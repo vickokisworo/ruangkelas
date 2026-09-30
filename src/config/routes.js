@@ -9,6 +9,7 @@ export const ROUTES = {
   JADWAL: '/kelas/:kelasId/jadwal',
   TUGAS: '/kelas/:kelasId/tugas',
   PENGUMUMAN: '/kelas/:kelasId/pengumuman',
+  PROFIL: '/profil',
 }
 
 export const kelolaAnggotaPath = (kelasId) => `/kelas/${kelasId}/anggota`

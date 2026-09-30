@@ -1,3 +1,4 @@
+
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ROUTES } from '@/config/routes'
 import ProtectedRoute from './ProtectedRoute'
@@ -11,6 +12,7 @@ import JadwalPage from '@/features/jadwal/pages/JadwalPage'
 import TugasPage from '@/features/tugas/pages/TugasPage'
 import PengumumanPage from '@/features/pengumuman/pages/PengumumanPage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
+import ProfilPage from '@/features/profil/pages/ProfilPage'
 
 export default function AppRoutes() {
   return (
@@ -37,6 +39,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.TUGAS} element={<TugasPage />} />
         <Route path={ROUTES.MAPEL} element={<MapelPage />} />
         <Route path={ROUTES.KELOLA_ANGGOTA} element={<KelolaAnggotaPage />} />
+        <Route path={ROUTES.PROFIL} element={<ProfilPage />} />
       </Route>
     </Routes>
   )

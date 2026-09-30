@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { authService } from '@/features/auth/services/authService'
 import { dashboardService } from '@/features/dashboard/services/dashboardService'
 import { ROUTES, kelolaAnggotaPath, mapelPath } from '@/config/routes'
 import { ROLE, ROLE_LABEL, PENGURUS_ROLES } from '@/config/constants'
@@ -29,11 +28,6 @@ export default function DashboardPage() {
     dashboardService.getRingkasan(kelasId, user.id).then(setRingkasan)
   }, [kelasId, user.id])
 
-  const handleLogout = async () => {
-    await authService.signOut()
-    navigate(ROUTES.LOGIN)
-  }
-
   if (loading) return <LoadingScreen />
 
   return (
@@ -51,9 +45,9 @@ export default function DashboardPage() {
           <button
             type="button"
             className="mr-8 text-xs text-pencil hover:text-ink"
-            onClick={handleLogout}
+            onClick={() => navigate(ROUTES.PROFIL)}
           >
-            Keluar
+            Profil
           </button>
         </header>
 

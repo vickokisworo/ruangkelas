@@ -60,6 +60,12 @@ const ICONS = {
       <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
     </Icon>
   ),
+  profil: (
+    <Icon>
+      <circle cx="12" cy="8" r="3" />
+      <path d="M5 19a7 7 0 0 1 14 0" />
+    </Icon>
+  ),
 }
 
 const itemClass = (aktif) =>
@@ -99,6 +105,7 @@ export default function BottomNav() {
     { label: 'Pengumuman', to: pengumumanPath(kelasId), ikon: ICONS.pengumuman },
     { label: 'Jadwal', to: jadwalPath(kelasId), ikon: ICONS.jadwal },
     { label: 'Tugas', to: tugasPath(kelasId), ikon: ICONS.tugas },
+    { label: 'Profil', to: ROUTES.PROFIL, ikon: ICONS.profil },
   ]
 
   // Semua isi menu Kelola khusus ketua (mapel & anggota)
