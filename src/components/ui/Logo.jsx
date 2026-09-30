@@ -1,5 +1,5 @@
 export default function Logo({ compact = false, className = '' }) {
-  const ukuran = compact ? 'h-7 w-auto' : 'h-10 w-auto'
+  const ukuran = compact ? 'h-12 w-auto' : 'h-20 w-auto'
 
   return (
     <span className={`inline-flex items-center ${className}`}>
