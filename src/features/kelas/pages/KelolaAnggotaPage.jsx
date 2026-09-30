@@ -5,7 +5,7 @@ import { useKelas } from '@/context/KelasContext'
 import { anggotaService } from '@/features/kelas/services/anggotaService'
 import { ROUTES } from '@/config/routes'
 import { ROLE, ROLE_LABEL, MAX_WAKIL_KETUA, MIN_MAX_ANGGOTA, ABSOLUT_MAX_ANGGOTA } from '@/config/constants'
-import { Button, Field, LoadingScreen } from '@/components/ui'
+import { Button, Field, LoadingScreen, ConfirmDialog } from '@/components/ui'
 
 export default function KelolaAnggotaPage() {
   const navigate = useNavigate()
@@ -20,7 +20,10 @@ export default function KelolaAnggotaPage() {
   const [menyimpanBatas, setMenyimpanBatas] = useState(false)
   const [error, setError] = useState('')
   const [serahId, setSerahId] = useState(null)
+  const [keluarId, setKeluarId] = useState(null)
   const isKetua = role === ROLE.KETUA
+  const calonKetua = anggota.find((a) => a.id === serahId)
+  const calonKeluar = anggota.find((a) => a.id === keluarId)
 
   const muatAnggota = async () => {
     const [{ data, error: fetchError }, { data: kelasData }] = await Promise.all([
@@ -164,74 +167,73 @@ export default function KelolaAnggotaPage() {
               </div>
 
               {isKetua && a.role !== ROLE.KETUA && (
-                <div className="flex flex-col items-end gap-2">
-                  {serahId === a.id ? (
-                    <div className="max-w-[13rem] text-right text-xs text-ink">
-                      <p>Jadikan {a.user?.nama ?? 'anggota ini'} ketua? Kamu jadi anggota.</p>
-                      <div className="mt-2 flex justify-end gap-3">
-                        <button
-                          type="button"
-                          className="font-medium text-marker disabled:opacity-50"
-                          disabled={processingId === a.id}
-                          onClick={() => handleSerahKetua(a)}
-                        >
-                          Ya
-                        </button>
-                        <button
-                          type="button"
-                          className="text-pencil hover:text-ink"
-                          disabled={processingId === a.id}
-                          onClick={() => setSerahId(null)}
-                        >
-                          Batal
-                        </button>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                    disabled={processingId === a.id}
+                    onClick={() => setSerahId(a.id)}
+                  >
+                    Jadikan ketua
+                  </button>
+                  {a.role === ROLE.ANGGOTA ? (
+                    <button
+                      type="button"
+                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                      disabled={processingId === a.id || jumlahWakilKetua >= MAX_WAKIL_KETUA}
+                      onClick={() => handleAksi(anggotaService.jadikanWakilKetua, a.id)}
+                    >
+                      Wakil
+                    </button>
                   ) : (
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                        disabled={processingId === a.id}
-                        onClick={() => setSerahId(a.id)}
-                      >
-                        Jadikan ketua
-                      </button>
-                      {a.role === ROLE.ANGGOTA ? (
-                        <button
-                          type="button"
-                          className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                          disabled={processingId === a.id || jumlahWakilKetua >= MAX_WAKIL_KETUA}
-                          onClick={() => handleAksi(anggotaService.jadikanWakilKetua, a.id)}
-                        >
-                          Wakil
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                          disabled={processingId === a.id}
-                          onClick={() => handleAksi(anggotaService.turunkanKeAnggota, a.id)}
-                        >
-                          Turunkan
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="text-xs text-marker hover:underline disabled:opacity-50"
-                        disabled={processingId === a.id}
-                        onClick={() => handleAksi(anggotaService.keluarkanAnggota, a.id)}
-                      >
-                        Keluarkan
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                      disabled={processingId === a.id}
+                      onClick={() => handleAksi(anggotaService.turunkanKeAnggota, a.id)}
+                    >
+                      Turunkan
+                    </button>
                   )}
+                  <button
+                    type="button"
+                    className="text-xs text-marker hover:underline disabled:opacity-50"
+                    disabled={processingId === a.id}
+                    onClick={() => setKeluarId(a.id)}
+                  >
+                    Keluarkan
+                  </button>
                 </div>
               )}
             </div>
           ))}
         </div>
       </div>
+
+      <ConfirmDialog
+        terbuka={Boolean(calonKetua)}
+        judul="Ganti ketua"
+        isi={`Jadikan ${calonKetua?.user?.nama ?? 'anggota ini'} ketua? Kamu akan menjadi anggota.`}
+        yaLabel="Ya"
+        bahaya
+        disabled={processingId === serahId}
+        onYa={() => calonKetua && handleSerahKetua(calonKetua)}
+        onBatal={() => setSerahId(null)}
+      />
+      <ConfirmDialog
+        terbuka={Boolean(calonKeluar)}
+        judul="Keluarkan anggota"
+        isi={`Keluarkan ${calonKeluar?.user?.nama ?? 'anggota ini'} dari kelas?`}
+        yaLabel="Ya, keluarkan"
+        bahaya
+        disabled={processingId === keluarId}
+        onYa={() => {
+          if (!calonKeluar) return
+          setKeluarId(null)
+          handleAksi(anggotaService.keluarkanAnggota, calonKeluar.id)
+        }}
+        onBatal={() => setKeluarId(null)}
+      />
     </div>
   )
 }

@@ -6,7 +6,7 @@ import { authService } from '@/features/auth/services/authService'
 import { profilService } from '@/features/profil/services/profilService'
 import { ROUTES } from '@/config/routes'
 import { ROLE_LABEL } from '@/config/constants'
-import { Field, Button, LoadingScreen } from '@/components/ui'
+import { Field, Button, LoadingScreen, ConfirmDialog } from '@/components/ui'
 
 export default function ProfilPage() {
   const navigate = useNavigate()
@@ -130,30 +130,24 @@ export default function ProfilPage() {
         </section>
 
         <section className="mt-8 border-t border-line pt-5">
-          {!konfirmasiKeluar ? (
-            <button
-              type="button"
-              className="text-sm text-pencil hover:text-ink"
-              onClick={() => setKonfirmasiKeluar(true)}
-            >
-              Keluar
-            </button>
-          ) : (
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-ink">Keluar dari akun ini?</span>
-              <button type="button" className="font-medium text-marker" onClick={handleLogout}>
-                Ya, keluar
-              </button>
-              <button
-                type="button"
-                className="text-pencil hover:text-ink"
-                onClick={() => setKonfirmasiKeluar(false)}
-              >
-                Batal
-              </button>
-            </div>
-          )}
+          <button
+            type="button"
+            className="text-sm text-pencil hover:text-ink"
+            onClick={() => setKonfirmasiKeluar(true)}
+          >
+            Keluar
+          </button>
         </section>
+
+        <ConfirmDialog
+          terbuka={konfirmasiKeluar}
+          judul="Keluar"
+          isi="Keluar dari akun ini?"
+          yaLabel="Ya, keluar"
+          bahaya
+          onYa={handleLogout}
+          onBatal={() => setKonfirmasiKeluar(false)}
+        />
       </div>
     </div>
   )
