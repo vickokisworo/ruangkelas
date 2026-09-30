@@ -30,7 +30,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout eyebrow="RuangKelas" title="Buat akun" subtitle="Khusus buat kamu, siswa SMA.">
+    <AuthLayout title="Buat akun" subtitle="Khusus buat kamu, siswa SMA.">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field
           label="Nama lengkap"

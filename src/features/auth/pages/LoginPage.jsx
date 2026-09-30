@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout eyebrow="RuangKelas" title="Masuk" subtitle="Lanjut ke ruang kelas kamu.">
+    <AuthLayout title="Masuk" subtitle="Lanjut ke ruang kelas kamu.">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field
           label="Email"

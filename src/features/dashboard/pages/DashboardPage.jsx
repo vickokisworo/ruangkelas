@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { dashboardService } from '@/features/dashboard/services/dashboardService'
 import { ROLE_LABEL, PENGURUS_ROLES } from '@/config/constants'
-import { LoadingScreen } from '@/components/ui'
+import { LoadingScreen, Logo } from '@/components/ui'
 import RingkasanKelas from '@/features/dashboard/components/RingkasanKelas'
 
 export default function DashboardPage() {
@@ -31,12 +31,13 @@ export default function DashboardPage() {
     <div className="min-h-screen px-5 py-8">
       <div className="mx-auto max-w-2xl">
         <header className="mb-8 border-b border-line pb-5 pr-10">
-          <p className="text-sm text-pencil">
-            RuangKelas · {kelasInfo?.role && ROLE_LABEL[kelasInfo.role]}
-          </p>
+          <Logo compact className="mb-3 text-pencil" />
           <h1 className="text-xl font-semibold text-ink">
             {kelasInfo?.kelas?.nama_kelas ?? 'Belum ada kelas'}
           </h1>
+          {kelasInfo?.role && (
+            <p className="mt-1 text-sm text-pencil">{ROLE_LABEL[kelasInfo.role]}</p>
+          )}
         </header>
 
         {PENGURUS_ROLES.includes(kelasInfo?.role) && (
