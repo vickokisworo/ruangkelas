@@ -35,6 +35,17 @@ export const anggotaService = {
     return { error }
   },
 
+  async serahKetua(kelasId, memberId) {
+    const { error } = await supabase.rpc('serah_ketua', {
+      p_kelas_id: kelasId,
+      p_member_id: memberId,
+    })
+    if (error?.message?.includes('menyerahkan')) {
+      return { error: { message: error.message } }
+    }
+    return { error }
+  },
+
   async getPengaturanKelas(kelasId) {
     return supabase.from('kelas').select('id, nama_kelas, max_anggota').eq('id', kelasId).single()
   },
