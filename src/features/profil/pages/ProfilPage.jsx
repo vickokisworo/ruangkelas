@@ -78,7 +78,6 @@ export default function ProfilPage() {
             onChange={(e) => setNama(e.target.value)}
             required
           />
-          <Field label="Email" name="email" value={profil?.email ?? user?.email ?? ''} disabled />
           <Button type="submit" disabled={menyimpan || !nama.trim()}>
             {menyimpan ? 'Menyimpan...' : 'Simpan'}
           </Button>

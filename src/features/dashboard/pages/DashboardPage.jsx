@@ -33,22 +33,13 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen px-5 py-8">
       <div className="mx-auto max-w-2xl">
-        <header className="mb-8 flex items-center justify-between border-b border-line pb-5">
-          <div>
-            <p className="text-sm text-pencil">
-              RuangKelas · {kelasInfo?.role && ROLE_LABEL[kelasInfo.role]}
-            </p>
-            <h1 className="text-xl font-semibold text-ink">
-              {kelasInfo?.kelas?.nama_kelas ?? 'Belum ada kelas'}
-            </h1>
-          </div>
-          <button
-            type="button"
-            className="mr-8 text-xs text-pencil hover:text-ink"
-            onClick={() => navigate(ROUTES.PROFIL)}
-          >
-            Profil
-          </button>
+        <header className="mb-8 border-b border-line pb-5 pr-10">
+          <p className="text-sm text-pencil">
+            RuangKelas · {kelasInfo?.role && ROLE_LABEL[kelasInfo.role]}
+          </p>
+          <h1 className="text-xl font-semibold text-ink">
+            {kelasInfo?.kelas?.nama_kelas ?? 'Belum ada kelas'}
+          </h1>
         </header>
 
         {PENGURUS_ROLES.includes(kelasInfo?.role) && (
