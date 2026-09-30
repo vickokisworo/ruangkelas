@@ -7,6 +7,7 @@ export const notifikasiService = {
   },
 
   async listNotifikasi() {
+    await supabase.rpc('bersih_notifikasi_saya')
     const { data, error } = await supabase
       .from('notifikasi')
       .select('id, jenis, judul, isi, tautan, dibaca, created_at')
