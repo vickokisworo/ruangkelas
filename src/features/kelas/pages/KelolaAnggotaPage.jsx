@@ -19,6 +19,7 @@ export default function KelolaAnggotaPage() {
   const [processingId, setProcessingId] = useState(null)
   const [menyimpanBatas, setMenyimpanBatas] = useState(false)
   const [error, setError] = useState('')
+  const [serahId, setSerahId] = useState(null)
   const isKetua = role === ROLE.KETUA
 
   const muatAnggota = async () => {
@@ -85,6 +86,19 @@ export default function KelolaAnggotaPage() {
     muatAnggota()
   }
 
+  const handleSerahKetua = async (member) => {
+    setError('')
+    setProcessingId(member.id)
+    const { error: serahError } = await anggotaService.serahKetua(kelasId, member.id)
+    setProcessingId(null)
+    if (serahError) {
+      setError(serahError.message || 'Gagal menyerahkan ketua.')
+      setSerahId(null)
+      return
+    }
+    window.location.assign(ROUTES.DASHBOARD)
+  }
+
   if (loading) return <LoadingScreen />
 
   return (
@@ -149,35 +163,69 @@ export default function KelolaAnggotaPage() {
                 <p className="text-sm text-pencil">{ROLE_LABEL[a.role]}</p>
               </div>
 
-              {a.role !== ROLE.KETUA && (
-                <div className="flex items-center gap-3">
-                  {a.role === ROLE.ANGGOTA ? (
-                    <button
-                      type="button"
-                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                      disabled={processingId === a.id || jumlahWakilKetua >= MAX_WAKIL_KETUA}
-                      onClick={() => handleAksi(anggotaService.jadikanWakilKetua, a.id)}
-                    >
-                      Wakil
-                    </button>
+              {isKetua && a.role !== ROLE.KETUA && (
+                <div className="flex flex-col items-end gap-2">
+                  {serahId === a.id ? (
+                    <div className="max-w-[13rem] text-right text-xs text-ink">
+                      <p>Jadikan {a.user?.nama ?? 'anggota ini'} ketua? Kamu jadi anggota.</p>
+                      <div className="mt-2 flex justify-end gap-3">
+                        <button
+                          type="button"
+                          className="font-medium text-marker disabled:opacity-50"
+                          disabled={processingId === a.id}
+                          onClick={() => handleSerahKetua(a)}
+                        >
+                          Ya
+                        </button>
+                        <button
+                          type="button"
+                          className="text-pencil hover:text-ink"
+                          disabled={processingId === a.id}
+                          onClick={() => setSerahId(null)}
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <button
-                      type="button"
-                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                      disabled={processingId === a.id}
-                      onClick={() => handleAksi(anggotaService.turunkanKeAnggota, a.id)}
-                    >
-                      Turunkan
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                        disabled={processingId === a.id}
+                        onClick={() => setSerahId(a.id)}
+                      >
+                        Jadikan ketua
+                      </button>
+                      {a.role === ROLE.ANGGOTA ? (
+                        <button
+                          type="button"
+                          className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                          disabled={processingId === a.id || jumlahWakilKetua >= MAX_WAKIL_KETUA}
+                          onClick={() => handleAksi(anggotaService.jadikanWakilKetua, a.id)}
+                        >
+                          Wakil
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="text-xs text-pencil hover:text-ink disabled:opacity-50"
+                          disabled={processingId === a.id}
+                          onClick={() => handleAksi(anggotaService.turunkanKeAnggota, a.id)}
+                        >
+                          Turunkan
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="text-xs text-marker hover:underline disabled:opacity-50"
+                        disabled={processingId === a.id}
+                        onClick={() => handleAksi(anggotaService.keluarkanAnggota, a.id)}
+                      >
+                        Keluarkan
+                      </button>
+                    </div>
                   )}
-                  <button
-                    type="button"
-                    className="text-xs text-marker hover:underline disabled:opacity-50"
-                    disabled={processingId === a.id}
-                    onClick={() => handleAksi(anggotaService.keluarkanAnggota, a.id)}
-                  >
-                    Keluarkan
-                  </button>
                 </div>
               )}
             </div>
