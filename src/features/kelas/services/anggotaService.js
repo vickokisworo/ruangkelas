@@ -5,9 +5,27 @@ export const anggotaService = {
   async listAnggota(kelasId) {
     return supabase
       .from('kelas_members')
-      .select('id, role, joined_at, user_id, user:user_id (id, nama, email)')
+      .select('id, role, joined_at, user_id, user:user_id (id, nama)')
       .eq('kelas_id', kelasId)
       .order('role', { ascending: true })
+  },
+
+  async getAnggota(kelasId, userId) {
+    return supabase
+      .from('kelas_members')
+      .select('id, role, joined_at, user_id, user:user_id (id, nama)')
+      .eq('kelas_id', kelasId)
+      .eq('user_id', userId)
+      .maybeSingle()
+  },
+
+  async jumlahWakil(kelasId) {
+    const { count, error } = await supabase
+      .from('kelas_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('kelas_id', kelasId)
+      .eq('role', ROLE.WAKIL_KETUA)
+    return { count: count ?? 0, error }
   },
 
   async jadikanWakilKetua(memberId) {

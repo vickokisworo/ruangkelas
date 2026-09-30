@@ -3,9 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useKelas } from '@/context/KelasContext'
 import { anggotaService } from '@/features/kelas/services/anggotaService'
-import { ROUTES } from '@/config/routes'
+import { ROUTES, profilAnggotaPath } from '@/config/routes'
 import { ROLE, ROLE_LABEL, MAX_WAKIL_KETUA, MIN_MAX_ANGGOTA, ABSOLUT_MAX_ANGGOTA } from '@/config/constants'
-import { Button, Field, LoadingScreen, ConfirmDialog } from '@/components/ui'
+import { Button, Field, LoadingScreen } from '@/components/ui'
 
 export default function KelolaAnggotaPage() {
   const navigate = useNavigate()
@@ -16,14 +16,9 @@ export default function KelolaAnggotaPage() {
   const [maxAnggota, setMaxAnggota] = useState('')
   const [maxInput, setMaxInput] = useState('')
   const [loading, setLoading] = useState(true)
-  const [processingId, setProcessingId] = useState(null)
   const [menyimpanBatas, setMenyimpanBatas] = useState(false)
   const [error, setError] = useState('')
-  const [serahId, setSerahId] = useState(null)
-  const [keluarId, setKeluarId] = useState(null)
   const isKetua = role === ROLE.KETUA
-  const calonKetua = anggota.find((a) => a.id === serahId)
-  const calonKeluar = anggota.find((a) => a.id === keluarId)
 
   const muatAnggota = async () => {
     const [{ data, error: fetchError }, { data: kelasData }] = await Promise.all([
@@ -33,7 +28,6 @@ export default function KelolaAnggotaPage() {
     if (fetchError) {
       setError('Gagal memuat daftar anggota.')
     } else {
-      // Urutan tampilan: ketua, wakil ketua, lalu anggota
       const urutan = { [ROLE.KETUA]: 0, [ROLE.WAKIL_KETUA]: 1, [ROLE.ANGGOTA]: 2 }
       setAnggota((data ?? []).sort((a, b) => urutan[a.role] - urutan[b.role]))
     }
@@ -75,31 +69,12 @@ export default function KelolaAnggotaPage() {
     setMaxAnggota(nilai)
   }
 
-  const handleAksi = async (aksi, memberId) => {
-    setError('')
-    setProcessingId(memberId)
-
-    const { error: aksiError } = await aksi(memberId)
-
-    setProcessingId(null)
-    if (aksiError) {
-      setError(aksiError.message)
+  const bukaProfil = (item) => {
+    if (item.user_id === user.id) {
+      navigate(ROUTES.PROFIL)
       return
     }
-    muatAnggota()
-  }
-
-  const handleSerahKetua = async (member) => {
-    setError('')
-    setProcessingId(member.id)
-    const { error: serahError } = await anggotaService.serahKetua(kelasId, member.id)
-    setProcessingId(null)
-    if (serahError) {
-      setError(serahError.message || 'Gagal menyerahkan ketua.')
-      setSerahId(null)
-      return
-    }
-    window.location.assign(ROUTES.DASHBOARD)
+    navigate(profilAnggotaPath(kelasId, item.user_id))
   }
 
   if (loading) return <LoadingScreen />
@@ -107,16 +82,15 @@ export default function KelolaAnggotaPage() {
   return (
     <div className="min-h-screen px-5 py-8">
       <div className="mx-auto max-w-2xl">
-        <header className="mb-6 flex items-center justify-between border-b border-line pb-5">
-          <div>
-            <button
-              onClick={() => navigate(ROUTES.DASHBOARD)}
-              className="mb-1 text-sm text-pencil hover:text-ink"
-            >
-              ← Kembali ke dashboard
-            </button>
-            <h1 className="text-xl font-semibold text-ink">Kelola Anggota</h1>
-          </div>
+        <header className="mb-6 border-b border-line pb-5 pr-10">
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+            className="mb-1 text-sm text-pencil hover:text-ink"
+          >
+            ← Kembali ke dashboard
+          </button>
+          <h1 className="text-xl font-semibold text-ink">Kelola Anggota</h1>
         </header>
 
         <p className="mb-4 text-sm text-pencil">
@@ -154,9 +128,11 @@ export default function KelolaAnggotaPage() {
 
         <div className="space-y-2">
           {anggota.map((a) => (
-            <div
+            <button
               key={a.id}
-              className="flex items-center justify-between rounded-md border border-line p-4"
+              type="button"
+              className="flex w-full items-center justify-between rounded-md border border-line p-4 text-left hover:bg-ink/5"
+              onClick={() => bukaProfil(a)}
             >
               <div>
                 <p className="font-medium text-ink">
@@ -165,75 +141,11 @@ export default function KelolaAnggotaPage() {
                 </p>
                 <p className="text-sm text-pencil">{ROLE_LABEL[a.role]}</p>
               </div>
-
-              {isKetua && a.role !== ROLE.KETUA && (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                    disabled={processingId === a.id}
-                    onClick={() => setSerahId(a.id)}
-                  >
-                    Jadikan ketua
-                  </button>
-                  {a.role === ROLE.ANGGOTA ? (
-                    <button
-                      type="button"
-                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                      disabled={processingId === a.id || jumlahWakilKetua >= MAX_WAKIL_KETUA}
-                      onClick={() => handleAksi(anggotaService.jadikanWakilKetua, a.id)}
-                    >
-                      Wakil
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="text-xs text-pencil hover:text-ink disabled:opacity-50"
-                      disabled={processingId === a.id}
-                      onClick={() => handleAksi(anggotaService.turunkanKeAnggota, a.id)}
-                    >
-                      Turunkan
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="text-xs text-marker hover:underline disabled:opacity-50"
-                    disabled={processingId === a.id}
-                    onClick={() => setKeluarId(a.id)}
-                  >
-                    Keluarkan
-                  </button>
-                </div>
-              )}
-            </div>
+              <span className="text-xs text-pencil">Lihat</span>
+            </button>
           ))}
         </div>
       </div>
-
-      <ConfirmDialog
-        terbuka={Boolean(calonKetua)}
-        judul="Ganti ketua"
-        isi={`Jadikan ${calonKetua?.user?.nama ?? 'anggota ini'} ketua? Kamu akan menjadi anggota.`}
-        yaLabel="Ya"
-        bahaya
-        disabled={processingId === serahId}
-        onYa={() => calonKetua && handleSerahKetua(calonKetua)}
-        onBatal={() => setSerahId(null)}
-      />
-      <ConfirmDialog
-        terbuka={Boolean(calonKeluar)}
-        judul="Keluarkan anggota"
-        isi={`Keluarkan ${calonKeluar?.user?.nama ?? 'anggota ini'} dari kelas?`}
-        yaLabel="Ya, keluarkan"
-        bahaya
-        disabled={processingId === keluarId}
-        onYa={() => {
-          if (!calonKeluar) return
-          setKeluarId(null)
-          handleAksi(anggotaService.keluarkanAnggota, calonKeluar.id)
-        }}
-        onBatal={() => setKeluarId(null)}
-      />
     </div>
   )
 }

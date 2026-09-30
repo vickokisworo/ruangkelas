@@ -1,4 +1,3 @@
-
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ROUTES } from '@/config/routes'
 import ProtectedRoute from './ProtectedRoute'
@@ -7,6 +6,7 @@ import LoginPage from '@/features/auth/pages/LoginPage'
 import RegisterPage from '@/features/auth/pages/RegisterPage'
 import MulaiKelasPage from '@/features/kelas/pages/MulaiKelasPage'
 import KelolaAnggotaPage from '@/features/kelas/pages/KelolaAnggotaPage'
+import ProfilAnggotaPage from '@/features/kelas/pages/ProfilAnggotaPage'
 import MapelPage from '@/features/mapel/pages/MapelPage'
 import JadwalPage from '@/features/jadwal/pages/JadwalPage'
 import TugasPage from '@/features/tugas/pages/TugasPage'
@@ -38,6 +38,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.JADWAL} element={<JadwalPage />} />
         <Route path={ROUTES.TUGAS} element={<TugasPage />} />
         <Route path={ROUTES.MAPEL} element={<MapelPage />} />
+        <Route path={ROUTES.PROFIL_ANGGOTA} element={<ProfilAnggotaPage />} />
         <Route path={ROUTES.KELOLA_ANGGOTA} element={<KelolaAnggotaPage />} />
         <Route path={ROUTES.PROFIL} element={<ProfilPage />} />
       </Route>

@@ -5,6 +5,7 @@ export const ROUTES = {
   MULAI_KELAS: '/kelas/mulai',
   DASHBOARD: '/dashboard',
   KELOLA_ANGGOTA: '/kelas/:kelasId/anggota',
+  PROFIL_ANGGOTA: '/kelas/:kelasId/anggota/:userId',
   MAPEL: '/kelas/:kelasId/mapel',
   JADWAL: '/kelas/:kelasId/jadwal',
   TUGAS: '/kelas/:kelasId/tugas',
@@ -13,6 +14,7 @@ export const ROUTES = {
 }
 
 export const kelolaAnggotaPath = (kelasId) => `/kelas/${kelasId}/anggota`
+export const profilAnggotaPath = (kelasId, userId) => `/kelas/${kelasId}/anggota/${userId}`
 export const mapelPath = (kelasId) => `/kelas/${kelasId}/mapel`
 export const jadwalPath = (kelasId) => `/kelas/${kelasId}/jadwal`
 export const tugasPath = (kelasId) => `/kelas/${kelasId}/tugas`
