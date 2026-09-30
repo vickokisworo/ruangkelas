@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: 28 35 33;
+  --paper: 250 247 240;
+  --chalk: 58 107 92;
+  --marker: 228 87 46;
+  --pencil: 138 133 120;
+  --line: 218 213 198;
+  color-scheme: light;
+}
+
+html.dark {
+  --ink: 236 232 224;
+  --paper: 18 20 19;
+  --chalk: 122 176 158;
+  --marker: 232 120 90;
+  --pencil: 156 152 142;
+  --line: 48 52 48;
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-paper text-ink font-body;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-display;
+}
