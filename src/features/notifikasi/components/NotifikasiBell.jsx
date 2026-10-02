@@ -16,6 +16,7 @@ export default function NotifikasiBell() {
   const navigate = useNavigate()
   const [daftar, setDaftar] = useState([])
   const [terbuka, setTerbuka] = useState(false)
+  const [siap, setSiap] = useState(false)
   const [izin, setIzin] = useState(
     typeof Notification === 'undefined' ? 'tidak-didukung' : Notification.permission,
   )
