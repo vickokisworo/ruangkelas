@@ -4,6 +4,7 @@ import RequireKelas from './RequireKelas'
 import BottomNav from '@/components/layout/BottomNav'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import NotifikasiBell from '@/features/notifikasi/components/NotifikasiBell'
+import PasangAplikasi from '@/components/pwa/PasangAplikasi'
 
 // Kerangka semua halaman kelas: butuh login + sudah punya kelas, plus menu bawah di mobile.
 // Dipasang sebagai layout route, jadi menu tidak dibuat ulang tiap pindah halaman dan
@@ -19,6 +20,7 @@ export default function KelasLayout() {
           <Outlet />
         </div>
         <ThemeToggle className="fixed right-4 top-4 z-30" />
+        <PasangAplikasi />
         <NotifikasiBell />
         <BottomNav />
       </RequireKelas>

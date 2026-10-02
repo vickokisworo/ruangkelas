@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { notifikasiService, teksBagikan } from '@/features/notifikasi/services/notifikasiService'
+import { mintaNotifikasiPonsel, tampilkanNotifikasiPonsel } from '@/pwa/pwa'
 
 function formatWaktu(iso) {
   return new Date(iso).toLocaleString('id-ID', {
@@ -15,12 +16,21 @@ export default function NotifikasiBell() {
   const navigate = useNavigate()
   const [daftar, setDaftar] = useState([])
   const [terbuka, setTerbuka] = useState(false)
-  const [siap, setSiap] = useState(false)
+  const [izin, setIzin] = useState(
+    typeof Notification === 'undefined' ? 'tidak-didukung' : Notification.permission,
+  )
+  const sudahDilihat = useState(() => new Set())[0]
 
   const muat = async () => {
     await notifikasiService.sinkronDeadline()
     const { data, error } = await notifikasiService.listNotifikasi()
     if (!error) {
+      if (siap && izin === 'granted') {
+        data
+          .filter((n) => !n.dibaca && !sudahDilihat.has(n.id))
+          .forEach((n) => tampilkanNotifikasiPonsel(n))
+      }
+      data.forEach((n) => sudahDilihat.add(n.id))
       setDaftar(data)
       setSiap(true)
     }
@@ -44,6 +54,11 @@ export default function NotifikasiBell() {
   const handleSemua = async () => {
     await notifikasiService.tandaiSemua()
     setDaftar((prev) => prev.map((n) => ({ ...n, dibaca: true })))
+  }
+
+  const handleIzin = async () => {
+    const hasil = await mintaNotifikasiPonsel()
+    setIzin(hasil)
   }
 
   const handleWhatsApp = () => {
@@ -132,6 +147,15 @@ export default function NotifikasiBell() {
             </div>
 
             <div className="border-t border-line px-4 py-3">
+              {izin !== 'granted' && izin !== 'tidak-didukung' && (
+                <button
+                  type="button"
+                  className="mb-2 block text-sm font-medium text-chalk hover:underline"
+                  onClick={handleIzin}
+                >
+                  Aktifkan notifikasi HP
+                </button>
+              )}
               <button
                 type="button"
                 className="text-sm font-medium text-chalk hover:underline"
