@@ -1,8 +1,56 @@
+const KUNCI_NOTIF = 'ruangkelas-notifikasi-hp'
+let acaraPasang = null
+const pendengarPasang = new Set()
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault()
+    acaraPasang = event
+    pendengarPasang.forEach((fn) => fn(acaraPasang))
+  })
+}
+
 export function daftarkanServiceWorker() {
   if (!('serviceWorker' in navigator)) return
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {})
   })
+}
+
+export function sudahTerpasang() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+  )
+}
+
+export function onBisaPasang(callback) {
+  pendengarPasang.add(callback)
+  if (acaraPasang) callback(acaraPasang)
+  return () => pendengarPasang.delete(callback)
+}
+
+export async function pasangAplikasi() {
+  if (!acaraPasang) return false
+  acaraPasang.prompt()
+  const hasil = await acaraPasang.userChoice
+  acaraPasang = null
+  return hasil.outcome === 'accepted'
+}
+
+export function notifikasiHpNyala() {
+  try {
+    return localStorage.getItem(KUNCI_NOTIF) !== 'mati'
+  } catch {
+    return true
+  }
+}
+
+export function simpanNotifikasiHp(nyala) {
+  try {
+    localStorage.setItem(KUNCI_NOTIF, nyala ? 'nyala' : 'mati')
+  } catch {
+    /* abaikan */
+  }
 }
 
 export async function mintaNotifikasiPonsel() {
@@ -13,6 +61,7 @@ export async function mintaNotifikasiPonsel() {
 }
 
 export async function tampilkanNotifikasiPonsel(item) {
+  if (!notifikasiHpNyala()) return
   if (!('Notification' in window) || Notification.permission !== 'granted') return
   const judul = item.judul || 'Ruang Kelas'
   const opsi = {
@@ -33,3 +82,4 @@ export async function tampilkanNotifikasiPonsel(item) {
   }
   new Notification(judul, opsi)
 }
+
