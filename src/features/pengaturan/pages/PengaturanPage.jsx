@@ -71,12 +71,13 @@ function Sakelar({ nyala, label, onClick }) {
       aria-checked={nyala}
       aria-label={label}
       onClick={onClick}
-      className={`relative h-6 w-11 rounded-full transition-colors ${nyala ? 'bg-chalk' : 'bg-line'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+        nyala ? 'bg-chalk' : 'bg-line'
+      }`}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-paper transition-transform ${
-          nyala ? 'translate-x-5' : 'translate-x-0.5'
-        }`}
+        className="absolute top-1 h-5 w-5 rounded-full bg-white shadow-sm transition-all"
+        style={{ left: nyala ? 'calc(100% - 1.45rem)' : '0.15rem' }}
       />
     </button>
   )
