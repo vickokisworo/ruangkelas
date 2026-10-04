@@ -212,12 +212,6 @@ export default function TugasPage() {
     <div className="min-h-screen px-5 py-8">
       <div className="mx-auto max-w-2xl">
         <header className="mb-6 border-b border-line pb-5">
-          <button
-            onClick={() => navigate(ROUTES.DASHBOARD)}
-            className="mb-1 text-sm text-pencil hover:text-ink"
-          >
-            ← Kembali ke dashboard
-          </button>
           <h1 className="text-xl font-semibold text-ink">Tugas & PR</h1>
         </header>
 
