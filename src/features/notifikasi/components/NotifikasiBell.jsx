@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { notifikasiService, teksBagikan } from '@/features/notifikasi/services/notifikasiService'
-import { mintaNotifikasiPonsel, tampilkanNotifikasiPonsel } from '@/pwa/pwa'
+import { tampilkanNotifikasiPonsel } from '@/pwa/pwa'
 
 function formatWaktu(iso) {
   return new Date(iso).toLocaleString('id-ID', {
@@ -55,11 +55,6 @@ export default function NotifikasiBell() {
   const handleSemua = async () => {
     await notifikasiService.tandaiSemua()
     setDaftar((prev) => prev.map((n) => ({ ...n, dibaca: true })))
-  }
-
-  const handleIzin = async () => {
-    const hasil = await mintaNotifikasiPonsel()
-    setIzin(hasil)
   }
 
   const handleWhatsApp = () => {
@@ -148,15 +143,6 @@ export default function NotifikasiBell() {
             </div>
 
             <div className="border-t border-line px-4 py-3">
-              {izin !== 'granted' && izin !== 'tidak-didukung' && (
-                <button
-                  type="button"
-                  className="mb-2 block text-sm font-medium text-chalk hover:underline"
-                  onClick={handleIzin}
-                >
-                  Aktifkan notifikasi HP
-                </button>
-              )}
               <button
                 type="button"
                 className="text-sm font-medium text-chalk hover:underline"

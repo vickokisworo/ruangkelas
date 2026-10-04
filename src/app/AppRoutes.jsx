@@ -13,6 +13,7 @@ import TugasPage from '@/features/tugas/pages/TugasPage'
 import PengumumanPage from '@/features/pengumuman/pages/PengumumanPage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 import ProfilPage from '@/features/profil/pages/ProfilPage'
+import PengaturanPage from '@/features/pengaturan/pages/PengaturanPage'
 
 export default function AppRoutes() {
   return (
@@ -41,6 +42,7 @@ export default function AppRoutes() {
         <Route path={ROUTES.PROFIL_ANGGOTA} element={<ProfilAnggotaPage />} />
         <Route path={ROUTES.KELOLA_ANGGOTA} element={<KelolaAnggotaPage />} />
         <Route path={ROUTES.PROFIL} element={<ProfilPage />} />
+        <Route path={ROUTES.PENGATURAN} element={<PengaturanPage />} />
       </Route>
     </Routes>
   )
