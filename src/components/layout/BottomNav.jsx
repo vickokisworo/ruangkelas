@@ -62,8 +62,10 @@ const ICONS = {
   ),
   pengaturan: (
     <Icon>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.8 5.8l1.6 1.6M16.6 16.6l1.6 1.6M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6" />
+      <path d="M4 7h16M4 12h16M4 17h16" />
+      <circle cx="8" cy="7" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="12" r="1.7" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="17" r="1.7" fill="currentColor" stroke="none" />
     </Icon>
   ),
 }
