@@ -12,7 +12,7 @@ security definer
 as $$
 begin
   perform net.http_post(
-    url := 'https://qrohmpdatdqljhxirzub.supabase.co/functions/v1/kirim-push',
+    url := 'https://qrohmpdatdqljhxirzub.supabase.co/functions/v1/rapid-handler',
     headers := jsonb_build_object('Content-Type', 'application/json'),
     body := jsonb_build_object(
       'type', tg_op,
