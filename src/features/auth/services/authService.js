@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { hapusPush } from '@/pwa/pwa'
 
 export const authService = {
   async signUp({ nama, email, password }) {
@@ -24,6 +25,7 @@ export const authService = {
   },
 
   async signOut() {
+    await hapusPush().catch(() => {})
     return supabase.auth.signOut()
   },
 
