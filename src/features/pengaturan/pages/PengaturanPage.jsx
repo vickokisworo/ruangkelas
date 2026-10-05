@@ -5,6 +5,8 @@ import { ROUTES } from '@/config/routes'
 import { useTema } from '@/context/ThemeContext'
 import { ConfirmDialog } from '@/components/ui'
 import {
+  daftarPush,
+  hapusPush,
   mintaNotifikasiPonsel,
   notifikasiHpNyala,
   onBisaPasang,
@@ -125,12 +127,18 @@ export default function PengaturanPage() {
     if (notifNyala) {
       simpanNotifikasiHp(false)
       setNotifNyala(false)
+      await hapusPush()
       setPesan('')
       return
     }
     const hasil = await mintaNotifikasiPonsel()
     setIzin(hasil)
     if (hasil === 'granted') {
+      const { error } = await daftarPush()
+      if (error) {
+        setPesan('Izin nyala, tapi langganan HP gagal. Coba lagi setelah situs dipasang.')
+        return
+      }
       simpanNotifikasiHp(true)
       setNotifNyala(true)
       setPesan('')

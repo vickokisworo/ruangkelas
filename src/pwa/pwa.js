@@ -1,4 +1,5 @@
-const KUNCI_NOTIF = 'ruangkelas-notifikasi-hp'
+import { supabase } from '@/lib/supabase'
+import { VAPID_PUBLIC_KEY } from '@/pwa/vapid'
 let acaraPasang = null
 const pendengarPasang = new Set()
 
@@ -58,6 +59,47 @@ export async function mintaNotifikasiPonsel() {
   if (Notification.permission === 'granted') return 'granted'
   if (Notification.permission === 'denied') return 'denied'
   return Notification.requestPermission()
+}
+
+function kunciVapid() {
+  const padding = '='.repeat((4 - (VAPID_PUBLIC_KEY.length % 4)) % 4)
+  const base64 = (VAPID_PUBLIC_KEY + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw = atob(base64)
+  return Uint8Array.from(raw, (c) => c.charCodeAt(0))
+}
+
+export async function daftarPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return { error: 'tidak-didukung' }
+  const reg = await navigator.serviceWorker.ready
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: kunciVapid(),
+  })
+  const json = sub.toJSON()
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData.user) return { error: 'belum-masuk' }
+  const { error } = await supabase.from('push_langganan').upsert(
+    {
+      user_id: userData.user.id,
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+    },
+    { onConflict: 'endpoint' },
+  )
+  return { error }
+}
+
+export async function hapusPush() {
+  try {
+    const reg = await navigator.serviceWorker?.ready
+    const sub = await reg?.pushManager.getSubscription()
+    const endpoint = sub?.endpoint
+    await sub?.unsubscribe()
+    if (endpoint) await supabase.from('push_langganan').delete().eq('endpoint', endpoint)
+  } catch {
+    /* abaikan */
+  }
 }
 
 export async function tampilkanNotifikasiPonsel(item) {
