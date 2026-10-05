@@ -789,6 +789,7 @@ begin
     from tugas t
     join kelas_members m on m.kelas_id = t.kelas_id and m.user_id = auth.uid()
     where t.deadline = (current_date + 1)
+      and (t.penulis_id is null or t.penulis_id is distinct from auth.uid())
       and not exists (
         select 1 from tugas_progress p
         where p.tugas_id = t.id and p.user_id = auth.uid()
