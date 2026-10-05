@@ -3,7 +3,7 @@ import { LAMPIRAN_BUCKET, MAX_LAMPIRAN_PER_ITEM } from '@/config/constants'
 import { validasiBerkas } from '@/utils/lampiran'
 
 function namaAman(nama) {
-  return nama.replace(/[^\w.\-]+/g, '_').slice(0, 80)
+  return nama.replace(/[^\w.-]+/g, '_').slice(0, 80)
 }
 
 export const lampiranService = {

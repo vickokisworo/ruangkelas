@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { VAPID_PUBLIC_KEY } from '@/pwa/vapid'
+
+const KUNCI_NOTIF = 'ruangkelas-notifikasi-hp'
 let acaraPasang = null
 const pendengarPasang = new Set()
 
