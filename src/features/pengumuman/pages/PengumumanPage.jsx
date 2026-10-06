@@ -20,7 +20,13 @@ import { lampiranService } from '@/features/lampiran/services/lampiranService'
 import { validasiDaftarBerkas } from '@/utils/lampiran'
 
 function formatWaktu(iso) {
-  return new Date(iso).toLocaleString('id-ID', {
+  const waktu = new Date(iso)
+  const detik = Math.max(0, Math.floor((Date.now() - waktu.getTime()) / 1000))
+  if (detik < 5) return 'baru saja'
+  if (detik < 60) return `${detik} detik lalu`
+  if (detik < 3600) return `${Math.floor(detik / 60)} menit lalu`
+  if (detik < 86400) return `${Math.floor(detik / 3600)} jam lalu`
+  return waktu.toLocaleString('id-ID', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
