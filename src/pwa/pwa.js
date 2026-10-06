@@ -133,3 +133,15 @@ export async function sinkronPushOtomatis() {
   await daftarPush()
 }
 
+export async function mintaIzinOtomatis() {
+  if (!sudahTerpasang()) return
+  if (!notifikasiHpNyala()) return
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return
+  if (Notification.permission === 'denied') return
+  const hasil = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission()
+  if (hasil === 'granted') {
+    simpanNotifikasiHp(true)
+    await daftarPush()
+  }
+}
+
