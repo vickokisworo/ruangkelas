@@ -4,18 +4,28 @@ import { notifikasiService, teksBagikan } from '@/features/notifikasi/services/n
 import { tampilkanNotifikasiPonsel } from '@/pwa/pwa'
 
 function formatWaktu(iso) {
-  return new Date(iso).toLocaleString('id-ID', {
+  const waktu = new Date(iso)
+  const detik = Math.max(0, Math.floor((Date.now() - waktu.getTime()) / 1000))
+  let lalu = 'baru saja'
+  if (detik >= 60 && detik < 3600) lalu = `${Math.floor(detik / 60)} menit lalu`
+  else if (detik >= 3600 && detik < 86400) lalu = `${Math.floor(detik / 3600)} jam lalu`
+  else if (detik >= 86400) lalu = `${Math.floor(detik / 86400)} hari lalu`
+  else if (detik >= 5) lalu = `${detik} detik lalu`
+
+  const tanggal = waktu.toLocaleString('id-ID', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
   })
+  return `${lalu} · ${tanggal}`
 }
 
 export default function NotifikasiBell() {
   const navigate = useNavigate()
   const [daftar, setDaftar] = useState([])
   const [terbuka, setTerbuka] = useState(false)
+  const [detik, setDetik] = useState(0)
   const [siap, setSiap] = useState(false)
   const [izin, setIzin] = useState(
     typeof Notification === 'undefined' ? 'tidak-didukung' : Notification.permission,
@@ -42,6 +52,12 @@ export default function NotifikasiBell() {
     const timer = setInterval(muat, 60 * 1000)
     return () => clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (!terbuka) return undefined
+    const timer = setInterval(() => setDetik((n) => n + 1), 30000)
+    return () => clearInterval(timer)
+  }, [terbuka])
 
   const belumDibaca = daftar.filter((n) => !n.dibaca).length
 
@@ -137,7 +153,7 @@ export default function NotifikasiBell() {
                 >
                   <p className="text-sm font-medium text-ink">{n.judul}</p>
                   {n.isi && <p className="mt-0.5 line-clamp-2 text-sm text-pencil">{n.isi}</p>}
-                  <p className="mt-1 text-xs text-pencil">{formatWaktu(n.created_at)}</p>
+                  <p className="mt-1 text-xs text-pencil">{formatWaktu(n.created_at, detik)}</p>
                 </button>
               ))}
             </div>
