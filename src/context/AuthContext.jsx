@@ -12,18 +12,14 @@ export function AuthProvider({ children }) {
     authService.getSession().then(({ data }) => {
       setSession(data.session)
       setLoading(false)
-      if (data.session?.user) {
-        sinkronPushOtomatis().catch(() => {})
-      }
+      if (data.session?.user) sinkronPushOtomatis().catch(() => {})
     })
 
     const {
       data: { subscription },
     } = authService.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
-      if (newSession?.user) {
-        sinkronPushOtomatis().catch(() => {})
-      }
+      if (newSession?.user) sinkronPushOtomatis().catch(() => {})
     })
 
     return () => subscription.unsubscribe()

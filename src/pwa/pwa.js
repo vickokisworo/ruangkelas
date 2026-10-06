@@ -128,17 +128,8 @@ export async function tampilkanNotifikasiPonsel(item) {
 }
 
 export async function sinkronPushOtomatis() {
-  if (typeof window === 'undefined') return
-  if (!('Notification' in window)) return
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
   if (!notifikasiHpNyala()) return
-
-  try {
-    if (Notification.permission === 'granted') {
-      await daftarPush()
-    }
-  } catch {
-    /* abaikan galat latar belakang */
-  }
+  if (!('Notification' in window) || Notification.permission !== 'granted') return
+  await daftarPush()
 }
 
