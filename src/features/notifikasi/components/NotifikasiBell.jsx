@@ -6,19 +6,16 @@ import { tampilkanNotifikasiPonsel } from '@/pwa/pwa'
 function formatWaktu(iso) {
   const waktu = new Date(iso)
   const detik = Math.max(0, Math.floor((Date.now() - waktu.getTime()) / 1000))
-  let lalu = 'baru saja'
-  if (detik >= 60 && detik < 3600) lalu = `${Math.floor(detik / 60)} menit lalu`
-  else if (detik >= 3600 && detik < 86400) lalu = `${Math.floor(detik / 3600)} jam lalu`
-  else if (detik >= 86400) lalu = `${Math.floor(detik / 86400)} hari lalu`
-  else if (detik >= 5) lalu = `${detik} detik lalu`
-
-  const tanggal = waktu.toLocaleString('id-ID', {
+  if (detik < 5) return 'baru saja'
+  if (detik < 60) return `${detik} detik lalu`
+  if (detik < 3600) return `${Math.floor(detik / 60)} menit lalu`
+  if (detik < 86400) return `${Math.floor(detik / 3600)} jam lalu`
+  return waktu.toLocaleString('id-ID', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
   })
-  return `${lalu} · ${tanggal}`
 }
 
 export default function NotifikasiBell() {
