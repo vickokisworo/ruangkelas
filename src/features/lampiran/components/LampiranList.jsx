@@ -31,25 +31,31 @@ export default function LampiranList({ daftar = [], bisaHapus = false, onHapus, 
         const url = urlMap[l.id]
         const gambar = isGambar(l.mime_type)
 
-        return (
-          <div key={l.id} className="rounded-md border border-line bg-paper p-2">
-            {gambar && url && (
-              <a href={url} target="_blank" rel="noreferrer" className="block">
-                <img
-                  src={url}
-                  alt={l.nama_file}
-                  className="mb-2 max-h-48 w-full rounded object-contain"
-                />
+        return gambar ? (
+          <div key={l.id} className="overflow-hidden rounded-2xl bg-black">
+            {url ? (
+              <a href={url} target="_blank" rel="noreferrer" className="flex max-h-[28rem] items-center justify-center bg-black">
+                <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
               </a>
+            ) : (
+              <div className="h-40 animate-pulse bg-black/80" />
             )}
+            {bisaHapus && (
+              <button
+                type="button"
+                className="px-3 py-1.5 text-xs font-medium text-marker hover:underline disabled:opacity-50"
+                disabled={disabled}
+                onClick={() => onHapus?.(l)}
+              >
+                Hapus gambar
+              </button>
+            )}
+          </div>
+        ) : (
+          <div key={l.id} className="rounded-md border border-line bg-paper p-2">
             <div className="flex items-center justify-between gap-2 text-sm">
               {url ? (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="truncate font-medium text-chalk hover:underline"
-                >
+                <a href={url} target="_blank" rel="noreferrer" className="truncate font-medium text-chalk hover:underline">
                   {l.nama_file}
                 </a>
               ) : (
