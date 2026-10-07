@@ -14,6 +14,27 @@ export function isGambar(mime) {
   return typeof mime === 'string' && mime.startsWith('image/')
 }
 
+export async function kompresGambar(file) {
+  if (!isGambar(file.type) || file.type === 'image/gif') return file
+  const bitmap = await createImageBitmap(file).catch(() => null)
+  if (!bitmap) return file
+
+  const batas = 1600
+  const skala = Math.min(1, batas / Math.max(bitmap.width, bitmap.height))
+  const lebar = Math.max(1, Math.round(bitmap.width * skala))
+  const tinggi = Math.max(1, Math.round(bitmap.height * skala))
+  const kanvas = document.createElement('canvas')
+  kanvas.width = lebar
+  kanvas.height = tinggi
+  kanvas.getContext('2d').drawImage(bitmap, 0, 0, lebar, tinggi)
+  bitmap.close?.()
+
+  const blob = await new Promise((selesai) => kanvas.toBlob(selesai, 'image/jpeg', 0.75))
+  if (!blob || blob.size >= file.size) return file
+  const nama = file.name.replace(/\.\w+$/, '') + '.jpg'
+  return new File([blob], nama, { type: 'image/jpeg', lastModified: Date.now() })
+}
+
 export function validasiBerkas(file, jumlahSekarang = 0) {
   if (!file) return 'Pilih berkas dulu.'
   if (jumlahSekarang >= MAX_LAMPIRAN_PER_ITEM) {

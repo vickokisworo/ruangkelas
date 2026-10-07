@@ -27,6 +27,21 @@ function formatTanggal(deadline) {
   })
 }
 
+function formatWaktu(iso) {
+  const waktu = new Date(iso)
+  const detik = Math.max(0, Math.floor((Date.now() - waktu.getTime()) / 1000))
+  if (detik < 5) return 'baru saja'
+  if (detik < 60) return `${detik} detik lalu`
+  if (detik < 3600) return `${Math.floor(detik / 60)} menit lalu`
+  if (detik < 86400) return `${Math.floor(detik / 3600)} jam lalu`
+  return waktu.toLocaleString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export default function TugasPage() {
   const navigate = useNavigate()
   const { kelasId } = useParams()
@@ -314,7 +329,7 @@ export default function TugasPage() {
                     )}
                   </p>
                   <p className="text-xs text-pencil">
-                    Oleh {t.penulis?.nama ?? 'Pengguna'}
+                    {t.penulis?.nama ?? 'Pengguna'} · {formatWaktu(t.created_at)}
                     {isPengurus && typeof t.jumlahSelesai === 'number' && (
                       <> · {t.jumlahSelesai} siswa selesai</>
                     )}

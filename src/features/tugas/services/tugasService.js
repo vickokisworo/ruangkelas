@@ -18,7 +18,7 @@ export const tugasService = {
         'id, judul, deadline, penulis_id, created_at, mapel:mapel_id (id, nama_mapel), penulis:penulis_id (nama), lampiran (id, nama_file, mime_type, ukuran, storage_path), progress:tugas_progress (user_id)',
       )
       .eq('kelas_id', kelasId)
-      .order('deadline', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       const cadangan = await supabase
@@ -27,15 +27,14 @@ export const tugasService = {
           'id, judul, deadline, penulis_id, created_at, mapel:mapel_id (id, nama_mapel), penulis:penulis_id (nama), lampiran (id, nama_file, mime_type, ukuran, storage_path)',
         )
         .eq('kelas_id', kelasId)
-        .order('deadline', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false })
       if (cadangan.error) return cadangan
       const daftar = (cadangan.data ?? []).map((t) => ({ ...t, selesai: false, jumlahSelesai: 0 }))
-      daftar.sort((a, b) => Number(a.selesai) - Number(b.selesai))
       return { data: daftar, error: null }
     }
 
     const daftar = (data ?? []).map((t) => normalkanTugas(t, userId))
-    daftar.sort((a, b) => Number(a.selesai) - Number(b.selesai))
+    daftar.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     return { data: daftar, error: null }
   },
 

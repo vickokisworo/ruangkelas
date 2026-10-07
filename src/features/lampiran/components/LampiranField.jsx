@@ -1,12 +1,13 @@
 import { MAX_LAMPIRAN_PER_ITEM, MAX_UKURAN_LAMPIRAN } from '@/config/constants'
-import { formatUkuran } from '@/utils/lampiran'
+import { formatUkuran, kompresGambar } from '@/utils/lampiran'
 
 export default function LampiranField({ files, onChange, disabled, sisa = MAX_LAMPIRAN_PER_ITEM }) {
   const bisaTambah = sisa > 0 && !disabled
 
-  const handlePilih = (e) => {
+  const handlePilih = async (e) => {
     const tambahan = Array.from(e.target.files ?? [])
-    onChange([...(files ?? []), ...tambahan].slice(0, (files?.length ?? 0) + sisa))
+    const siap = await Promise.all(tambahan.map((file) => kompresGambar(file)))
+    onChange([...(files ?? []), ...siap].slice(0, (files?.length ?? 0) + sisa))
     e.target.value = ''
   }
 

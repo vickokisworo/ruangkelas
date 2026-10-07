@@ -1,22 +1,23 @@
 import { supabase } from '@/lib/supabase'
 import { LAMPIRAN_BUCKET, MAX_LAMPIRAN_PER_ITEM } from '@/config/constants'
-import { validasiBerkas } from '@/utils/lampiran'
+import { kompresGambar, validasiBerkas } from '@/utils/lampiran'
 
 function namaAman(nama) {
-  return nama.replace(/[^\w.-]+/g, '_').slice(0, 80)
+  return nama.replace(/[^\w.\-]+/g, '_').slice(0, 80)
 }
 
 export const lampiranService = {
   async unggah({ file, kelasId, pengumumanId, tugasId, jumlahSekarang = 0 }) {
-    const pesan = validasiBerkas(file, jumlahSekarang)
+    const berkas = await kompresGambar(file)
+    const pesan = validasiBerkas(berkas, jumlahSekarang)
     if (pesan) return { error: { message: pesan } }
 
     const folder = pengumumanId ? 'pengumuman' : 'tugas'
     const pemilikId = pengumumanId ?? tugasId
-    const path = `${kelasId}/${folder}/${pemilikId}/${crypto.randomUUID()}-${namaAman(file.name)}`
+    const path = `${kelasId}/${folder}/${pemilikId}/${crypto.randomUUID()}-${namaAman(berkas.name)}`
 
-    const { error: unggahError } = await supabase.storage.from(LAMPIRAN_BUCKET).upload(path, file, {
-      contentType: file.type || undefined,
+    const { error: unggahError } = await supabase.storage.from(LAMPIRAN_BUCKET).upload(path, berkas, {
+      contentType: berkas.type || undefined,
       upsert: false,
     })
     if (unggahError) {
@@ -31,9 +32,9 @@ export const lampiranService = {
       pengumuman_id: pengumumanId ?? null,
       tugas_id: tugasId ?? null,
       storage_path: path,
-      nama_file: file.name,
-      mime_type: file.type || 'application/octet-stream',
-      ukuran: file.size,
+      nama_file: berkas.name,
+      mime_type: berkas.type || 'application/octet-stream',
+      ukuran: berkas.size,
     })
 
     if (simpanError) {
