@@ -165,6 +165,8 @@ export default function KomentarThread({
   onKirim,
   onHapus,
   onSuka,
+  langsung = false,
+  onBuka,
 }) {
   const [terbuka, setTerbuka] = useState(false)
   const [isi, setIsi] = useState('')
@@ -194,6 +196,99 @@ export default function KomentarThread({
     }
   }
 
+  const daftarKomentar = (
+    <div className="space-y-4">
+      {utas.length === 0 && <p className="py-4 text-sm text-pencil">Belum ada komentar.</p>}
+      {utas.map((item) => {
+        const tampilBalasan = balasanTerbuka[item.id] || item.balasan.length <= 1
+        return (
+          <div key={item.id} className="space-y-3">
+            <BarisKomentar
+              item={item}
+              userId={userId}
+              isPengurus={isPengurus}
+              processing={processing}
+              onBalas={(balasan) => {
+                setMembalas(balasan)
+                const tag = `@${balasan.penulis?.nama ?? 'Pengguna'} `
+                setIsi((prev) => (prev.trim() ? prev : tag))
+              }}
+              onHapus={onHapus}
+              onSuka={onSuka}
+            />
+            {item.balasan.length > 1 && (
+              <button
+                type="button"
+                className="ml-10 text-xs font-medium text-pencil hover:text-ink"
+                onClick={() => setBalasanTerbuka((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
+              >
+                {tampilBalasan ? 'Sembunyikan balasan' : `Lihat ${item.balasan.length} balasan`}
+              </button>
+            )}
+            {tampilBalasan &&
+              item.balasan.map((balasan) => (
+                <BarisKomentar
+                  key={balasan.id}
+                  item={balasan}
+                  userId={userId}
+                  isPengurus={isPengurus}
+                  processing={processing}
+                  menjorok
+                  onBalas={(sasaran) => {
+                    setMembalas(sasaran)
+                    const tag = `@${sasaran.penulis?.nama ?? 'Pengguna'} `
+                    setIsi((prev) => (prev.trim() ? prev : tag))
+                  }}
+                  onHapus={onHapus}
+                  onSuka={onSuka}
+                />
+              ))}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  const formulir = (
+    <form onSubmit={handleKirim} className="border-t border-line px-1 py-3">
+      {membalas && (
+        <div className="mb-2 flex items-center justify-between text-xs text-pencil">
+          <span>Membalas {membalas.penulis?.nama ?? 'Pengguna'}</span>
+          <button type="button" onClick={() => setMembalas(null)}>
+            Batal
+          </button>
+        </div>
+      )}
+      <div className="flex items-end gap-2">
+        <textarea
+          className="max-h-24 min-h-[40px] flex-1 resize-none rounded-full border border-line px-4 py-2 text-sm outline-none focus:border-chalk"
+          rows={1}
+          maxLength={MAX_KOMENTAR_PANJANG}
+          placeholder={membalas ? `Balas ${membalas.penulis?.nama ?? 'Pengguna'}...` : 'Tambahkan komentar...'}
+          value={isi}
+          onChange={(e) => setIsi(e.target.value)}
+          disabled={processing}
+        />
+        <button
+          type="submit"
+          className="pb-2 text-sm font-semibold text-chalk disabled:text-pencil"
+          disabled={processing || !isi.trim()}
+        >
+          Kirim
+        </button>
+      </div>
+    </form>
+  )
+
+  if (langsung) {
+    return (
+      <div className="mt-4 border-t border-line pt-3">
+        {daftarKomentar}
+        {formulir}
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="mt-3 flex items-center border-t border-line pt-2">
@@ -201,7 +296,7 @@ export default function KomentarThread({
           type="button"
           className="inline-flex items-center gap-1.5 rounded-md px-1 py-1.5 text-sm text-pencil hover:text-ink"
           aria-label={`Buka komentar, ${komentar.length}`}
-          onClick={() => setTerbuka(true)}
+          onClick={() => (onBuka ? onBuka() : setTerbuka(true))}
         >
           <IkonKomentar />
           <span>{komentar.length}</span>
@@ -216,7 +311,6 @@ export default function KomentarThread({
             aria-label="Tutup komentar"
             onClick={() => setTerbuka(false)}
           />
-
           <section
             role="dialog"
             aria-label="Komentar"
@@ -226,107 +320,13 @@ export default function KomentarThread({
               <span className="h-1 w-10 rounded-full bg-line" />
               <div className="flex w-full items-center justify-between px-4 py-2">
                 <h2 className="text-sm font-semibold text-ink">Komentar</h2>
-                <button
-                  type="button"
-                  className="text-sm text-pencil hover:text-ink"
-                  onClick={() => setTerbuka(false)}
-                >
+                <button type="button" className="text-sm text-pencil hover:text-ink" onClick={() => setTerbuka(false)}>
                   Tutup
                 </button>
               </div>
             </div>
-
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-2">
-              {utas.length === 0 && (
-                <p className="py-8 text-center text-sm text-pencil">Belum ada komentar.</p>
-              )}
-
-              {utas.map((item) => {
-                const tampilBalasan = balasanTerbuka[item.id] || item.balasan.length <= 1
-                return (
-                  <div key={item.id} className="space-y-3">
-                    <BarisKomentar
-                      item={item}
-                      userId={userId}
-                      isPengurus={isPengurus}
-                      processing={processing}
-                      onBalas={(item) => {
-                        setMembalas(item)
-                        const tag = `@${item.penulis?.nama ?? 'Pengguna'} `
-                        setIsi((prev) => (prev.trim() ? prev : tag))
-                      }}
-                      onHapus={onHapus}
-                      onSuka={onSuka}
-                    />
-                    {item.balasan.length > 1 && (
-                      <button
-                        type="button"
-                        className="ml-10 text-xs font-medium text-pencil hover:text-ink"
-                        onClick={() =>
-                          setBalasanTerbuka((prev) => ({ ...prev, [item.id]: !prev[item.id] }))
-                        }
-                      >
-                        {tampilBalasan
-                          ? 'Sembunyikan balasan'
-                          : `Lihat ${item.balasan.length} balasan`}
-                      </button>
-                    )}
-                    {tampilBalasan &&
-                      item.balasan.map((balasan) => (
-                        <BarisKomentar
-                          key={balasan.id}
-                          item={balasan}
-                          userId={userId}
-                          isPengurus={isPengurus}
-                          processing={processing}
-                          menjorok
-                          onBalas={(item) => {
-                        setMembalas(item)
-                        const tag = `@${item.penulis?.nama ?? 'Pengguna'} `
-                        setIsi((prev) => (prev.trim() ? prev : tag))
-                      }}
-                          onHapus={onHapus}
-                          onSuka={onSuka}
-                        />
-                      ))}
-                  </div>
-                )
-              })}
-            </div>
-
-            <form onSubmit={handleKirim} className="border-t border-line px-4 py-3">
-              {membalas && (
-                <div className="mb-2 flex items-center justify-between text-xs text-pencil">
-                  <span>Membalas {membalas.penulis?.nama ?? 'Pengguna'}</span>
-                  <button type="button" onClick={() => setMembalas(null)}>
-                    Batal
-                  </button>
-                </div>
-              )}
-              <div className="flex items-end gap-2">
-                <textarea
-                  className="max-h-24 min-h-[40px] flex-1 resize-none rounded-full border border-line px-4 py-2 text-sm outline-none focus:border-chalk"
-                  rows={1}
-                  maxLength={MAX_KOMENTAR_PANJANG}
-                  placeholder={
-                    membalas
-                      ? `Balas ${membalas.penulis?.nama ?? 'Pengguna'}...`
-                      : 'Tambahkan komentar... (@Nama untuk menyebut)'
-                  }
-                  value={isi}
-                  onChange={(e) => setIsi(e.target.value)}
-                  disabled={processing}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="pb-2 text-sm font-semibold text-chalk disabled:text-pencil"
-                  disabled={processing || !isi.trim()}
-                >
-                  Kirim
-                </button>
-              </div>
-            </form>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-2">{daftarKomentar}</div>
+            {formulir}
           </section>
         </div>
       )}

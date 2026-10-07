@@ -4,11 +4,13 @@ import { useAuth } from '@/context/AuthContext'
 import { pengumumanService } from '@/features/pengumuman/services/pengumumanService'
 import { dashboardService } from '@/features/dashboard/services/dashboardService'
 import { ROUTES } from '@/config/routes'
+import { supabase } from '@/lib/supabase'
 import {
   PENGURUS_ROLES,
   POLLING_MIN_OPSI,
   POLLING_MAX_OPSI,
   MAX_LAMPIRAN_PER_ITEM,
+  ROLE_LABEL,
 } from '@/config/constants'
 import { Button, LoadingScreen } from '@/components/ui'
 import PollingCard from '@/features/pengumuman/components/PollingCard'
@@ -54,6 +56,9 @@ export default function PengumumanPage() {
   const [editId, setEditId] = useState(null)
   const [isiEdit, setIsiEdit] = useState('')
   const [processingId, setProcessingId] = useState(null)
+  const [bukaId, setBukaId] = useState(null)
+  const [menuId, setMenuId] = useState(null)
+  const [peran, setPeran] = useState({})
 
   const isPengurus = PENGURUS_ROLES.includes(role)
 
@@ -68,6 +73,11 @@ export default function PengumumanPage() {
     const muatSemua = async () => {
       const { data: kelasInfo } = await dashboardService.getKelasUser(user.id)
       setRole(kelasInfo?.role ?? null)
+      const { data: anggota } = await supabase
+        .from('kelas_members')
+        .select('user_id, role')
+        .eq('kelas_id', kelasId)
+      setPeran(Object.fromEntries((anggota ?? []).map((a) => [a.user_id, a.role])))
       await muatPengumuman()
       setLoading(false)
     }
@@ -368,17 +378,17 @@ export default function PengumumanPage() {
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {daftar.length === 0 && (
             <p className="text-sm text-pencil">Belum ada pengumuman di kelas ini.</p>
           )}
 
-          {daftar.map((p) =>
+          {(bukaId ? daftar.filter((p) => p.id === bukaId) : daftar).map((p) =>
             editId === p.id ? (
               <form
                 key={p.id}
                 onSubmit={handleSimpanEdit}
-                className="space-y-2 rounded-md border border-chalk p-4"
+                className="space-y-2 rounded-2xl border border-chalk p-4"
               >
                 <textarea
                   className="w-full rounded-md border border-line px-3 py-2 outline-none focus:border-chalk"
@@ -389,19 +399,10 @@ export default function PengumumanPage() {
                   required
                 />
                 <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    className="w-auto px-3 py-2 text-sm"
-                    disabled={processingId === p.id}
-                  >
+                  <Button type="submit" className="w-auto px-3 py-2 text-sm" disabled={processingId === p.id}>
                     Simpan
                   </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="w-auto px-3 py-2 text-sm"
-                    onClick={() => setEditId(null)}
-                  >
+                  <Button type="button" variant="secondary" className="w-auto px-3 py-2 text-sm" onClick={() => setEditId(null)}>
                     Batal
                   </Button>
                 </div>
@@ -418,22 +419,56 @@ export default function PengumumanPage() {
                 />
               </form>
             ) : (
-              <div
-                key={p.id}
-                className={`rounded-md border p-4 ${
-                  p.pinned ? 'border-chalk bg-chalk/5' : 'border-line'
-                }`}
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <p className="text-xs text-pencil">
-                    {p.pinned && <span className="mr-1.5 font-medium text-chalk">📌 Dipin ·</span>}
-                    {p.penulis?.nama ?? 'Pengguna'} · {formatWaktu(p.created_at)}
-                  </p>
+              <article key={p.id} className="rounded-2xl border border-line p-4">
+                {bukaId && (
+                  <button type="button" className="mb-3 text-sm text-pencil" onClick={() => setBukaId(null)}>
+                    ← Pengumuman
+                  </button>
+                )}
+                <div className="flex items-start justify-between gap-3">
+                  <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setBukaId(p.id)}>
+                    <p className="truncate text-sm font-semibold text-ink">
+                      {p.penulis?.nama ?? 'Pengguna'}
+                      <span className="ml-1 font-normal text-pencil">
+                        {ROLE_LABEL[peran[p.penulis_id]] ?? 'Anggota'} · {formatWaktu(p.created_at)}
+                      </span>
+                    </p>
+                    {p.pinned && <p className="text-xs font-medium text-chalk">Dipin</p>}
+                  </button>
+                  {isPengurus && (
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className="rounded-full px-2 py-1 text-lg leading-none text-pencil hover:bg-ink/5"
+                        aria-label="Menu pengumuman"
+                        onClick={() => setMenuId(menuId === p.id ? null : p.id)}
+                      >
+                        ⋯
+                      </button>
+                      {menuId === p.id && (
+                        <div className="absolute right-0 z-10 mt-1 w-36 rounded-md border border-line bg-paper py-1 shadow-lg">
+                          <button type="button" className="block w-full px-3 py-2 text-left text-sm text-ink" onClick={() => { setMenuId(null); handleTogglePin(p) }}>
+                            {p.pinned ? 'Lepas pin' : 'Pin'}
+                          </button>
+                          <button type="button" className="block w-full px-3 py-2 text-left text-sm text-ink" onClick={() => { setMenuId(null); mulaiEdit(p) }}>
+                            Edit
+                          </button>
+                          <button type="button" className="block w-full px-3 py-2 text-left text-sm text-marker" onClick={() => { setMenuId(null); handleHapus(p) }}>
+                            Hapus
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="whitespace-pre-wrap text-ink">{p.isi}</p>
-
-                <LampiranList daftar={p.lampiran ?? []} />
-
+                <button type="button" className="mt-2 block w-full text-left" onClick={() => setBukaId(p.id)}>
+                  <p className={`whitespace-pre-wrap text-[15px] leading-6 text-ink ${bukaId ? '' : 'line-clamp-6'}`}>
+                    {p.isi}
+                  </p>
+                </button>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <LampiranList daftar={p.lampiran ?? []} />
+                </div>
                 {p.polling && (
                   <PollingCard
                     polling={p.polling}
@@ -443,36 +478,9 @@ export default function PengumumanPage() {
                     onToggleTutup={() => handleToggleTutup(p.id, p.polling)}
                   />
                 )}
-
-                {isPengurus && (
-                  <div className="mt-3 flex gap-2">
-                    <Button
-                      variant="secondary"
-                      className="w-auto px-3 py-1.5 text-sm"
-                      disabled={processingId === p.id}
-                      onClick={() => handleTogglePin(p)}
-                    >
-                      {p.pinned ? 'Lepas pin' : 'Pin'}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      className="w-auto px-3 py-1.5 text-sm"
-                      onClick={() => mulaiEdit(p)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      className="w-auto px-3 py-1.5 text-sm text-marker"
-                      disabled={processingId === p.id}
-                      onClick={() => handleHapus(p)}
-                    >
-                      Hapus
-                    </Button>
-                  </div>
-                )}
-
                 <KomentarThread
+                  langsung={Boolean(bukaId)}
+                  onBuka={() => setBukaId(p.id)}
                   komentar={(p.komentar ?? []).map((k) => ({
                     ...k,
                     disukai: (k.pemilihSuka ?? []).includes(user.id),
@@ -484,7 +492,7 @@ export default function PengumumanPage() {
                   onHapus={(komentarId) => handleHapusKomentar(p.id, komentarId)}
                   onSuka={(item) => handleSukaKomentar(p.id, item)}
                 />
-              </div>
+              </article>
             )
           )}
         </div>
