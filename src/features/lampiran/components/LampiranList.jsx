@@ -1,42 +1,53 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { lampiranService } from '@/features/lampiran/services/lampiranService'
 import { formatUkuran, isGambar } from '@/utils/lampiran'
 
 function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   const [indeks, setIndeks] = useState(0)
+  const mulai = useRef(0)
   const aktif = gambar[Math.min(indeks, gambar.length - 1)]
-  const url = urlMap[aktif?.id]
 
   const geser = (arah) => {
-    setIndeks((i) => (i + arah + gambar.length) % gambar.length)
+    setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + arah)))
+  }
+
+  const mulaiSentuh = (e) => {
+    mulai.current = e.touches[0].clientX
+  }
+
+  const selesaiSentuh = (e) => {
+    const selisih = e.changedTouches[0].clientX - mulai.current
+    if (selisih <= -40) geser(1)
+    if (selisih >= 40) geser(-1)
   }
 
   return (
     <div className="overflow-hidden rounded-2xl bg-black">
-      {url ? (
-        <a href={url} target="_blank" rel="noreferrer" className="flex max-h-[28rem] items-center justify-center bg-black">
-          <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
-        </a>
-      ) : (
-        <div className="h-40 animate-pulse bg-black/80" />
-      )}
-      {gambar.length > 1 && (
-        <div className="flex items-center justify-between px-3 py-2 text-white">
-          <button type="button" className="px-2 text-lg" aria-label="Gambar sebelumnya" onClick={() => geser(-1)}>
-            ‹
-          </button>
-          <span className="text-xs">
-            {Math.min(indeks, gambar.length - 1) + 1}/{gambar.length}
-          </span>
-          <button type="button" className="px-2 text-lg" aria-label="Gambar berikutnya" onClick={() => geser(1)}>
-            ›
-          </button>
+      <div className="relative" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
+        <div className="flex transition-transform duration-200" style={{ transform: `translateX(-${indeks * 100}%)` }}>
+          {gambar.map((g) => {
+            const url = urlMap[g.id]
+            return (
+              <div key={g.id} className="flex w-full shrink-0 items-center justify-center bg-black">
+                {url ? (
+                  <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
+                ) : (
+                  <div className="h-40 w-full animate-pulse bg-black/80" />
+                )}
+              </div>
+            )
+          })}
         </div>
-      )}
+        {gambar.length > 1 && (
+          <span className="absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
+            {indeks + 1}/{gambar.length}
+          </span>
+        )}
+      </div>
       {bisaHapus && (
         <button
           type="button"
-          className="px-3 pb-2 text-xs font-medium text-white/80 hover:underline disabled:opacity-50"
+          className="px-3 py-2 text-xs font-medium text-white/80 hover:underline disabled:opacity-50"
           disabled={disabled}
           onClick={() => onHapus?.(aktif)}
         >

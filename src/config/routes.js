@@ -10,6 +10,7 @@ export const ROUTES = {
   JADWAL: '/kelas/:kelasId/jadwal',
   TUGAS: '/kelas/:kelasId/tugas',
   PENGUMUMAN: '/kelas/:kelasId/pengumuman',
+  PENGUMUMAN_DETAIL: '/kelas/:kelasId/pengumuman/:pengumumanId',
   PROFIL: '/profil',
   PENGATURAN: '/pengaturan',
 }
@@ -20,3 +21,5 @@ export const mapelPath = (kelasId) => `/kelas/${kelasId}/mapel`
 export const jadwalPath = (kelasId) => `/kelas/${kelasId}/jadwal`
 export const tugasPath = (kelasId) => `/kelas/${kelasId}/tugas`
 export const pengumumanPath = (kelasId) => `/kelas/${kelasId}/pengumuman`
+export const pengumumanDetailPath = (kelasId, pengumumanId) =>
+  `/kelas/${kelasId}/pengumuman/${pengumumanId}`

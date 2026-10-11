@@ -36,6 +36,7 @@ export default function AppRoutes() {
       <Route element={<KelasLayout />}>
         <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
         <Route path={ROUTES.PENGUMUMAN} element={<PengumumanPage />} />
+        <Route path={ROUTES.PENGUMUMAN_DETAIL} element={<PengumumanPage />} />
         <Route path={ROUTES.JADWAL} element={<JadwalPage />} />
         <Route path={ROUTES.TUGAS} element={<TugasPage />} />
         <Route path={ROUTES.MAPEL} element={<MapelPage />} />

@@ -61,6 +61,7 @@ export default function TugasPage() {
   const [editId, setEditId] = useState(null)
   const [formEdit, setFormEdit] = useState({ judul: '', deadline: '', mapelId: '' })
   const [processingId, setProcessingId] = useState(null)
+  const [menuId, setMenuId] = useState(null)
 
   const isPengurus = PENGURUS_ROLES.includes(role)
 
@@ -68,6 +69,15 @@ export default function TugasPage() {
     const { data } = await tugasService.listTugas(kelasId, user.id)
     setDaftarTugas(data ?? [])
   }
+
+  useEffect(() => {
+    if (!menuId) return undefined
+    const tutup = (e) => {
+      if (!e.target.closest('[data-menu]')) setMenuId(null)
+    }
+    document.addEventListener('pointerdown', tutup)
+    return () => document.removeEventListener('pointerdown', tutup)
+  }, [menuId])
 
   useEffect(() => {
     const muatSemua = async () => {
@@ -232,6 +242,53 @@ export default function TugasPage() {
 
         {error && <p className="mb-4 text-sm text-marker">{error}</p>}
 
+        {isPengurus && menambah && (
+          <form onSubmit={handleTambah} className="mb-6 space-y-3">
+                <Field
+                  label="Judul tugas"
+                  type="text"
+                  placeholder="Contoh: Kerjakan LKS halaman 20"
+                  value={form.judul}
+                  onChange={(e) => setForm({ ...form, judul: e.target.value })}
+                  autoFocus
+                  required
+                />
+                <div className="flex flex-wrap gap-2">
+                  <label className="flex-1">
+                    <span className="mb-1.5 block text-sm font-medium text-ink">Deadline (opsional)</span>
+                    <input
+                      type="date"
+                      className="w-full rounded-md border border-line px-3.5 py-2.5 outline-none focus:border-chalk"
+                      value={form.deadline}
+                      onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                    />
+                  </label>
+                  <label className="flex-1">
+                    <span className="mb-1.5 block text-sm font-medium text-ink">Mapel (opsional)</span>
+                    <select
+                      className="w-full rounded-md border border-line px-3.5 py-2.5 outline-none focus:border-chalk"
+                      value={form.mapelId}
+                      onChange={(e) => setForm({ ...form, mapelId: e.target.value })}
+                    >
+                      <option value="">Tanpa mapel</option>
+                      {daftarMapel.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.nama_mapel}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <LampiranField files={berkasBaru} onChange={setBerkasBaru} />
+                <div className="flex gap-2">
+                  <Button type="submit">Tambah</Button>
+                  <Button type="button" variant="secondary" onClick={() => setMenambah(false)}>
+                    Batal
+                  </Button>
+                </div>
+              </form>
+        )}
+
         <div className="space-y-2">
           {daftarTugas.length === 0 && (
             <p className="text-sm text-pencil">Belum ada tugas ditambahkan.</p>
@@ -337,86 +394,40 @@ export default function TugasPage() {
                   <LampiranList daftar={t.lampiran ?? []} />
                 </div>
                 {isPengurus && (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      className="w-auto px-3 py-1.5 text-sm"
-                      onClick={() => mulaiEdit(t)}
+                  <div className="relative" data-menu>
+                    <button
+                      type="button"
+                      className="rounded-full px-2 py-1 text-lg leading-none text-pencil hover:bg-ink/5"
+                      aria-label="Menu tugas"
+                      onClick={() => setMenuId(menuId === t.id ? null : t.id)}
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      className="w-auto px-3 py-1.5 text-sm text-marker"
-                      disabled={processingId === t.id}
-                      onClick={() => handleHapus(t)}
-                    >
-                      Hapus
-                    </Button>
+                      ⋯
+                    </button>
+                    {menuId === t.id && (
+                      <div className="absolute right-0 z-10 mt-1 w-28 rounded-md border border-line bg-paper py-1 shadow-lg">
+                        <button type="button" className="block w-full px-3 py-2 text-left text-sm text-ink" onClick={() => { setMenuId(null); mulaiEdit(t) }}>
+                          Edit
+                        </button>
+                        <button type="button" className="block w-full px-3 py-2 text-left text-sm text-marker" onClick={() => { setMenuId(null); handleHapus(t) }}>
+                          Hapus
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             )
           )}
         </div>
-
-        {isPengurus && (
-          <div className="mt-6">
-            {menambah ? (
-              <form onSubmit={handleTambah} className="space-y-3">
-                <Field
-                  label="Judul tugas"
-                  type="text"
-                  placeholder="Contoh: Kerjakan LKS halaman 20"
-                  value={form.judul}
-                  onChange={(e) => setForm({ ...form, judul: e.target.value })}
-                  autoFocus
-                  required
-                />
-                <div className="flex flex-wrap gap-2">
-                  <label className="flex-1">
-                    <span className="mb-1.5 block text-sm font-medium text-ink">
-                      Deadline (opsional)
-                    </span>
-                    <input
-                      type="date"
-                      className="w-full rounded-md border border-line px-3.5 py-2.5 outline-none focus:border-chalk"
-                      value={form.deadline}
-                      onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                    />
-                  </label>
-                  <label className="flex-1">
-                    <span className="mb-1.5 block text-sm font-medium text-ink">
-                      Mapel (opsional)
-                    </span>
-                    <select
-                      className="w-full rounded-md border border-line px-3.5 py-2.5 outline-none focus:border-chalk"
-                      value={form.mapelId}
-                      onChange={(e) => setForm({ ...form, mapelId: e.target.value })}
-                    >
-                      <option value="">Tanpa mapel</option>
-                      {daftarMapel.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.nama_mapel}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-                <LampiranField files={berkasBaru} onChange={setBerkasBaru} />
-                <div className="flex gap-2">
-                  <Button type="submit">Tambah</Button>
-                  <Button type="button" variant="secondary" onClick={() => setMenambah(false)}>
-                    Batal
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <Button variant="secondary" onClick={() => setMenambah(true)}>
-                + Tambah tugas
-              </Button>
-            )}
-          </div>
+        {isPengurus && !menambah && (
+          <button
+            type="button"
+            className="fixed bottom-[calc(8.75rem_+_env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-chalk text-2xl text-paper shadow-lg"
+            aria-label="Tambah tugas"
+            onClick={() => setMenambah(true)}
+          >
+            +
+          </button>
         )}
       </div>
     </div>

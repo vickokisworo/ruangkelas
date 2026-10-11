@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { pengumumanService } from '@/features/pengumuman/services/pengumumanService'
 import { dashboardService } from '@/features/dashboard/services/dashboardService'
-import { ROUTES } from '@/config/routes'
+import { ROUTES, pengumumanDetailPath } from '@/config/routes'
 import { supabase } from '@/lib/supabase'
 import {
   PENGURUS_ROLES,
@@ -38,7 +38,7 @@ function formatWaktu(iso) {
 
 export default function PengumumanPage() {
   const navigate = useNavigate()
-  const { kelasId } = useParams()
+  const { kelasId, pengumumanId } = useParams()
   const { user } = useAuth()
 
   const [role, setRole] = useState(null)
@@ -56,7 +56,6 @@ export default function PengumumanPage() {
   const [editId, setEditId] = useState(null)
   const [isiEdit, setIsiEdit] = useState('')
   const [processingId, setProcessingId] = useState(null)
-  const [bukaId, setBukaId] = useState(null)
   const [menuId, setMenuId] = useState(null)
   const [peran, setPeran] = useState({})
 
@@ -68,6 +67,15 @@ export default function PengumumanPage() {
     else setError('')
     setDaftar(data ?? [])
   }
+
+  useEffect(() => {
+    if (!menuId) return undefined
+    const tutup = (e) => {
+      if (!e.target.closest('[data-menu]')) setMenuId(null)
+    }
+    document.addEventListener('pointerdown', tutup)
+    return () => document.removeEventListener('pointerdown', tutup)
+  }, [menuId])
 
   useEffect(() => {
     const muatSemua = async () => {
@@ -283,19 +291,29 @@ export default function PengumumanPage() {
 
   if (loading) return <LoadingScreen />
 
+  const tampil = pengumumanId ? daftar.filter((p) => p.id === pengumumanId) : daftar
+
   return (
-    <div className="min-h-screen px-5 py-8">
+    <div className={`min-h-screen px-5 py-8 ${pengumumanId ? 'pt-14' : ''}`}>
       <div className="mx-auto max-w-2xl">
-        <header className="mb-6 border-b border-line pb-5">
-          <h1 className="text-xl font-semibold text-ink">Pengumuman</h1>
-        </header>
+        {pengumumanId ? (
+          <button
+            type="button"
+            className="fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 rounded-full bg-paper px-3 py-2 text-sm font-medium text-ink shadow"
+            onClick={() => navigate(`/kelas/${kelasId}/pengumuman`)}
+          >
+            ←
+          </button>
+        ) : (
+          <header className="mb-6 border-b border-line pb-5">
+            <h1 className="text-xl font-semibold text-ink">Pengumuman</h1>
+          </header>
+        )}
 
         {error && <p className="mb-4 text-sm text-marker">{error}</p>}
 
-        {isPengurus && (
-          <div className="mb-6">
-            {menulis ? (
-              <form onSubmit={handleTambah} className="space-y-3">
+        {isPengurus && !pengumumanId && menulis && (
+          <form onSubmit={handleTambah} className="mb-6 space-y-3">
                 <textarea
                   className="w-full rounded-md border border-line px-3.5 py-2.5 outline-none focus:border-chalk"
                   rows={3}
@@ -370,20 +388,16 @@ export default function PengumumanPage() {
                   </Button>
                 </div>
               </form>
-            ) : (
-              <Button variant="secondary" onClick={() => setMenulis(true)}>
-                + Tulis pengumuman
-              </Button>
-            )}
-          </div>
         )}
 
-        <div className="space-y-3">
-          {daftar.length === 0 && (
-            <p className="text-sm text-pencil">Belum ada pengumuman di kelas ini.</p>
+        <div className="divide-y divide-line">
+          {tampil.length === 0 && (
+            <p className="text-sm text-pencil">
+              {pengumumanId ? 'Pengumuman tidak ditemukan.' : 'Belum ada pengumuman di kelas ini.'}
+            </p>
           )}
 
-          {(bukaId ? daftar.filter((p) => p.id === bukaId) : daftar).map((p) =>
+          {tampil.map((p) =>
             editId === p.id ? (
               <form
                 key={p.id}
@@ -419,14 +433,13 @@ export default function PengumumanPage() {
                 />
               </form>
             ) : (
-              <article key={p.id} className="rounded-2xl border border-line p-4">
-                {bukaId && (
-                  <button type="button" className="mb-3 text-sm text-pencil" onClick={() => setBukaId(null)}>
-                    ← Pengumuman
-                  </button>
-                )}
+              <article key={p.id} className="py-4">
                 <div className="flex items-start justify-between gap-3">
-                  <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setBukaId(p.id)}>
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 text-left"
+                    onClick={() => !pengumumanId && navigate(pengumumanDetailPath(kelasId, p.id))}
+                  >
                     <p className="truncate text-sm font-semibold text-ink">
                       {p.penulis?.nama ?? 'Pengguna'}
                       <span className="ml-1 font-normal text-pencil">
@@ -436,7 +449,7 @@ export default function PengumumanPage() {
                     {p.pinned && <p className="text-xs font-medium text-chalk">Dipin</p>}
                   </button>
                   {isPengurus && (
-                    <div className="relative">
+                    <div className="relative" data-menu>
                       <button
                         type="button"
                         className="rounded-full px-2 py-1 text-lg leading-none text-pencil hover:bg-ink/5"
@@ -461,8 +474,12 @@ export default function PengumumanPage() {
                     </div>
                   )}
                 </div>
-                <button type="button" className="mt-2 block w-full text-left" onClick={() => setBukaId(p.id)}>
-                  <p className={`whitespace-pre-wrap text-[15px] leading-6 text-ink ${bukaId ? '' : 'line-clamp-6'}`}>
+                <button
+                  type="button"
+                  className="mt-2 block w-full text-left"
+                  onClick={() => !pengumumanId && navigate(pengumumanDetailPath(kelasId, p.id))}
+                >
+                  <p className={`whitespace-pre-wrap text-[15px] leading-6 text-ink ${pengumumanId ? '' : 'line-clamp-6'}`}>
                     {p.isi}
                   </p>
                 </button>
@@ -479,8 +496,8 @@ export default function PengumumanPage() {
                   />
                 )}
                 <KomentarThread
-                  langsung={Boolean(bukaId)}
-                  onBuka={() => setBukaId(p.id)}
+                  langsung={Boolean(pengumumanId)}
+                  onBuka={() => navigate(pengumumanDetailPath(kelasId, p.id))}
                   komentar={(p.komentar ?? []).map((k) => ({
                     ...k,
                     disukai: (k.pemilihSuka ?? []).includes(user.id),
@@ -496,6 +513,16 @@ export default function PengumumanPage() {
             )
           )}
         </div>
+        {isPengurus && !pengumumanId && !menulis && (
+          <button
+            type="button"
+            className="fixed bottom-[calc(8.75rem_+_env(safe-area-inset-bottom))] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-chalk text-2xl text-paper shadow-lg"
+            aria-label="Tulis pengumuman"
+            onClick={() => setMenulis(true)}
+          >
+            +
+          </button>
+        )}
       </div>
     </div>
   )
