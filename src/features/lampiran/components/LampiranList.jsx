@@ -4,16 +4,14 @@ import { formatUkuran, isGambar } from '@/utils/lampiran'
 
 function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   const [indeks, setIndeks] = useState(0)
-  const [arah, setArah] = useState(0)
   const [detail, setDetail] = useState(false)
   const mulai = useRef(0)
   const geserJauh = useRef(false)
   const aktif = gambar[Math.min(indeks, gambar.length - 1)]
   const urlAktif = urlMap[aktif?.id]
 
-  const geser = (delta) => {
-    setArah(delta)
-    setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + delta)))
+  const geser = (arah) => {
+    setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + arah)))
   }
 
   const mulaiSentuh = (e) => {
@@ -59,25 +57,31 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   return (
     <div>
       <div className="relative overflow-hidden" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
-        <button
-          type="button"
-          className="block w-full"
-          onClick={(e) => {
-            e.stopPropagation()
-            bukaDetail()
-          }}
+        <div
+          className="flex items-start transition-transform duration-300 ease-out"
+          style={{ transform: `translateX(-${indeks * 100}%)` }}
         >
-          {urlAktif ? (
-            <img
-              key={aktif.id}
-              src={urlAktif}
-              alt=""
-              className={`block h-auto w-full ${arah > 0 ? 'slide-kanan' : 'slide-kiri'}`}
-            />
-          ) : (
-            <div className="h-40 w-full animate-pulse bg-line/40" />
-          )}
-        </button>
+          {gambar.map((g) => {
+            const url = urlMap[g.id]
+            return (
+              <button
+                key={g.id}
+                type="button"
+                className="block w-full shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  bukaDetail()
+                }}
+              >
+                {url ? (
+                  <img src={url} alt="" className="block h-auto w-full" />
+                ) : (
+                  <div className="h-40 w-full animate-pulse bg-line/40" />
+                )}
+              </button>
+            )
+          })}
+        </div>
         {gambar.length > 1 && (
           <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
             {indeks + 1}/{gambar.length}

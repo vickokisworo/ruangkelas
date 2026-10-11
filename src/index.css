@@ -22,34 +22,8 @@ html.dark {
   color-scheme: dark;
 }
 
-.slide-kanan {
-  animation: slide-kanan 280ms ease-out;
-}
-
-.slide-kiri {
-  animation: slide-kiri 280ms ease-out;
-}
-
-@keyframes slide-kanan {
-  from {
-    transform: translateX(18%);
-    opacity: 0.5;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-@keyframes slide-kiri {
-  from {
-    transform: translateX(-18%);
-    opacity: 0.5;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
+body {
+  @apply bg-paper text-ink font-body;
 }
 
 h1,
