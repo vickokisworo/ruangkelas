@@ -277,7 +277,9 @@ export default function KomentarThread({
     return (
       <div className="mt-4 border-t border-line pt-3">
         {daftarKomentar}
-        {formulir}
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper px-4 pb-[env(safe-area-inset-bottom)]">
+          {formulir}
+        </div>
       </div>
     )
   }
