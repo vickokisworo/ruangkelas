@@ -56,27 +56,50 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
 
   return (
     <div>
-      <div className="relative" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
-        <button
-          type="button"
-          className="block w-full"
-          onClick={(e) => {
-            e.stopPropagation()
-            bukaDetail()
-          }}
+      <div className="relative overflow-hidden" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
+        <div
+          className="flex items-start transition-transform duration-300 ease-out"
+          style={{ transform: `translateX(-${indeks * 100}%)` }}
         >
-          {urlAktif ? (
-            <img src={urlAktif} alt="" className="block h-auto w-full" />
-          ) : (
-            <div className="h-40 w-full animate-pulse bg-line/40" />
-          )}
-        </button>
+          {gambar.map((g) => {
+            const url = urlMap[g.id]
+            return (
+              <button
+                key={g.id}
+                type="button"
+                className="block w-full shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  bukaDetail()
+                }}
+              >
+                {url ? (
+                  <img src={url} alt="" className="block h-auto w-full" />
+                ) : (
+                  <div className="h-40 w-full animate-pulse bg-line/40" />
+                )}
+              </button>
+            )
+          })}
+        </div>
         {gambar.length > 1 && (
           <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
             {indeks + 1}/{gambar.length}
           </span>
         )}
       </div>
+      {gambar.length > 1 && (
+        <div className="mt-2 flex items-center justify-center gap-1.5">
+          {gambar.map((g, i) => (
+            <span
+              key={g.id}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === indeks ? 'w-4 bg-chalk' : 'w-1.5 bg-pencil/40'
+              }`}
+            />
+          ))}
+        </div>
+      )}
       {bisaHapus && (
         <button
           type="button"
