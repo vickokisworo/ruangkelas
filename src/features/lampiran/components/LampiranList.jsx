@@ -29,8 +29,18 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   }
 
   const bukaDetail = () => {
-    if (!geserJauh.current && urlAktif) setDetail(true)
+    if (!geserJauh.current && urlAktif) {
+      window.history.pushState({ fotoDetail: true }, '')
+      setDetail(true)
+    }
   }
+
+  useEffect(() => {
+    if (!detail) return undefined
+    const tutup = () => setDetail(false)
+    window.addEventListener('popstate', tutup)
+    return () => window.removeEventListener('popstate', tutup)
+  }, [detail])
 
   const unduh = async () => {
     if (!urlAktif) return
@@ -55,7 +65,10 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
                 key={g.id}
                 type="button"
                 className="flex w-full shrink-0 items-center justify-center bg-black"
-                onClick={bukaDetail}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  bukaDetail()
+                }}
               >
                 {url ? (
                   <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
@@ -85,7 +98,7 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
       {detail && urlAktif && (
         <div className="fixed inset-0 z-50 flex flex-col bg-black">
           <div className="flex items-center justify-between px-4 py-3 text-white">
-            <button type="button" className="text-sm" onClick={() => setDetail(false)}>
+            <button type="button" className="text-sm" onClick={() => window.history.back()}>
               Tutup
             </button>
             <span className="text-sm">

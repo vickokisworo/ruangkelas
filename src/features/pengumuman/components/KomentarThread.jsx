@@ -108,26 +108,31 @@ function BarisKomentar({
   const nama = item.penulis?.nama ?? 'Pengguna'
 
   return (
-    <div className={`flex gap-2 ${menjorok ? 'ml-8' : ''}`}>
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-line text-xs font-medium text-ink">
+    <div className={`flex gap-3 border-b border-line py-3 ${menjorok ? 'ml-8' : ''}`}>
+      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-line text-sm font-medium text-ink">
         {nama.slice(0, 1).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm">
-          <span className="font-medium text-ink">{nama}</span>
-          {item.membalasNama && (
-            <span className="text-pencil"> membalas {item.membalasNama}</span>
-          )}{' '}
-          <span className="whitespace-pre-wrap text-ink">{item.isi}</span>
+          <span className="font-semibold text-ink">{nama}</span>
+          <span className="text-pencil"> · {formatWaktu(item.created_at)}</span>
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-pencil">
-          <span>{formatWaktu(item.created_at)}</span>
+        {item.membalasNama && (
+          <p className="text-xs text-pencil">Membalas {item.membalasNama}</p>
+        )}
+        <p className="mt-1 whitespace-pre-wrap text-[15px] leading-6 text-ink">{item.isi}</p>
+        <div className="mt-2 flex items-center gap-5 text-xs text-pencil">
+          <button type="button" className="font-medium hover:text-ink" onClick={() => onBalas(item)}>
+            Balas
+          </button>
           <button
             type="button"
-            className="font-medium hover:text-ink"
-            onClick={() => onBalas(item)}
+            className={`inline-flex items-center gap-1 font-medium ${item.disukai ? 'text-marker' : ''}`}
+            disabled={processing}
+            onClick={() => onSuka(item)}
           >
-            Balas
+            <IkonSuka terisi={item.disukai} />
+            {item.jumlahSuka > 0 ? item.jumlahSuka : 'Suka'}
           </button>
           {bisaHapus && (
             <button
@@ -141,18 +146,6 @@ function BarisKomentar({
           )}
         </div>
       </div>
-      <button
-        type="button"
-        className={`flex shrink-0 flex-col items-center pt-1 ${
-          item.disukai ? 'text-marker' : 'text-pencil'
-        }`}
-        aria-label={item.disukai ? 'Batal suka' : 'Suka'}
-        disabled={processing}
-        onClick={() => onSuka(item)}
-      >
-        <IkonSuka terisi={item.disukai} />
-        {item.jumlahSuka > 0 && <span className="text-[10px]">{item.jumlahSuka}</span>}
-      </button>
     </div>
   )
 }
