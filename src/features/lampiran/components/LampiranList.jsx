@@ -10,8 +10,9 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   const aktif = gambar[Math.min(indeks, gambar.length - 1)]
   const urlAktif = urlMap[aktif?.id]
 
-  const geser = (arah) => {
-    setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + arah)))
+  const geser = (delta) => {
+    setArah(delta)
+    setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + delta)))
   }
 
   const mulaiSentuh = (e) => {
