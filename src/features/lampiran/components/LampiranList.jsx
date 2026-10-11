@@ -4,8 +4,11 @@ import { formatUkuran, isGambar } from '@/utils/lampiran'
 
 function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   const [indeks, setIndeks] = useState(0)
+  const [detail, setDetail] = useState(false)
   const mulai = useRef(0)
+  const geserJauh = useRef(false)
   const aktif = gambar[Math.min(indeks, gambar.length - 1)]
+  const urlAktif = urlMap[aktif?.id]
 
   const geser = (arah) => {
     setIndeks((i) => Math.min(gambar.length - 1, Math.max(0, i + arah)))
@@ -13,12 +16,32 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
 
   const mulaiSentuh = (e) => {
     mulai.current = e.touches[0].clientX
+    geserJauh.current = false
   }
 
   const selesaiSentuh = (e) => {
     const selisih = e.changedTouches[0].clientX - mulai.current
-    if (selisih <= -40) geser(1)
-    if (selisih >= 40) geser(-1)
+    if (Math.abs(selisih) >= 40) {
+      geserJauh.current = true
+      if (selisih < 0) geser(1)
+      if (selisih > 0) geser(-1)
+    }
+  }
+
+  const bukaDetail = () => {
+    if (!geserJauh.current && urlAktif) setDetail(true)
+  }
+
+  const unduh = async () => {
+    if (!urlAktif) return
+    const res = await fetch(urlAktif)
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const tautan = document.createElement('a')
+    tautan.href = objectUrl
+    tautan.download = aktif?.nama_file || 'gambar.jpg'
+    tautan.click()
+    URL.revokeObjectURL(objectUrl)
   }
 
   return (
@@ -28,18 +51,23 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
           {gambar.map((g) => {
             const url = urlMap[g.id]
             return (
-              <div key={g.id} className="flex w-full shrink-0 items-center justify-center bg-black">
+              <button
+                key={g.id}
+                type="button"
+                className="flex w-full shrink-0 items-center justify-center bg-black"
+                onClick={bukaDetail}
+              >
                 {url ? (
                   <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
                 ) : (
                   <div className="h-40 w-full animate-pulse bg-black/80" />
                 )}
-              </div>
+              </button>
             )
           })}
         </div>
         {gambar.length > 1 && (
-          <span className="absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
+          <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
             {indeks + 1}/{gambar.length}
           </span>
         )}
@@ -53,6 +81,24 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
         >
           Hapus gambar ini
         </button>
+      )}
+      {detail && urlAktif && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black">
+          <div className="flex items-center justify-between px-4 py-3 text-white">
+            <button type="button" className="text-sm" onClick={() => setDetail(false)}>
+              Tutup
+            </button>
+            <span className="text-sm">
+              {indeks + 1}/{gambar.length}
+            </span>
+            <button type="button" className="text-sm font-medium" onClick={unduh}>
+              Unduh
+            </button>
+          </div>
+          <div className="flex min-h-0 flex-1 items-center justify-center px-2" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
+            <img src={urlAktif} alt="" className="max-h-full max-w-full object-contain" />
+          </div>
+        </div>
       )}
     </div>
   )

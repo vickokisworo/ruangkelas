@@ -294,16 +294,20 @@ export default function PengumumanPage() {
   const tampil = pengumumanId ? daftar.filter((p) => p.id === pengumumanId) : daftar
 
   return (
-    <div className={`min-h-screen px-5 py-8 ${pengumumanId ? 'pt-14' : ''}`}>
+    <div className={`min-h-screen px-5 py-8 ${pengumumanId ? 'pt-20' : ''}`}>
       <div className="mx-auto max-w-2xl">
         {pengumumanId ? (
-          <button
-            type="button"
-            className="fixed left-3 top-[max(0.75rem,env(safe-area-inset-top))] z-40 rounded-full bg-paper px-3 py-2 text-sm font-medium text-ink shadow"
-            onClick={() => navigate(`/kelas/${kelasId}/pengumuman`)}
-          >
-            ←
-          </button>
+          <header className="fixed inset-x-0 top-0 z-40 flex items-center gap-3 border-b border-line bg-paper px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            <button
+              type="button"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-ink hover:bg-ink/5"
+              aria-label="Kembali"
+              onClick={() => navigate(`/kelas/${kelasId}/pengumuman`)}
+            >
+              ←
+            </button>
+            <h1 className="text-lg font-semibold text-ink">Pengumuman</h1>
+          </header>
         ) : (
           <header className="mb-6 border-b border-line pb-5">
             <h1 className="text-xl font-semibold text-ink">Pengumuman</h1>
