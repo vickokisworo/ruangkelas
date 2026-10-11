@@ -4,6 +4,7 @@ import { formatUkuran, isGambar } from '@/utils/lampiran'
 
 function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   const [indeks, setIndeks] = useState(0)
+  const [arah, setArah] = useState(0)
   const [detail, setDetail] = useState(false)
   const mulai = useRef(0)
   const geserJauh = useRef(false)
