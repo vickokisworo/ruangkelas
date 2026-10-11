@@ -55,30 +55,22 @@ function SlideGambar({ gambar, urlMap, bisaHapus, onHapus, disabled }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-black">
+    <div>
       <div className="relative" onTouchStart={mulaiSentuh} onTouchEnd={selesaiSentuh}>
-        <div className="flex transition-transform duration-200" style={{ transform: `translateX(-${indeks * 100}%)` }}>
-          {gambar.map((g) => {
-            const url = urlMap[g.id]
-            return (
-              <button
-                key={g.id}
-                type="button"
-                className="flex w-full shrink-0 items-center justify-center bg-black"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  bukaDetail()
-                }}
-              >
-                {url ? (
-                  <img src={url} alt="" className="max-h-[28rem] w-full object-contain" />
-                ) : (
-                  <div className="h-40 w-full animate-pulse bg-black/80" />
-                )}
-              </button>
-            )
-          })}
-        </div>
+        <button
+          type="button"
+          className="block w-full"
+          onClick={(e) => {
+            e.stopPropagation()
+            bukaDetail()
+          }}
+        >
+          {urlAktif ? (
+            <img src={urlAktif} alt="" className="block h-auto w-full" />
+          ) : (
+            <div className="h-40 w-full animate-pulse bg-line/40" />
+          )}
+        </button>
         {gambar.length > 1 && (
           <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/70 px-2 py-1 text-xs font-medium text-white">
             {indeks + 1}/{gambar.length}
